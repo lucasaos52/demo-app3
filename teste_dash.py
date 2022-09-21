@@ -18,7 +18,6 @@ print("aloha")
 print(os.path.dirname(sys.executable))
 print(site.getsitepackages()[0])
 
-
 data = OrderedDict(
     [
         ("Date", ["2015-01-01", "2015-10-24", "2016-05-10", "2017-01-10", "2018-05-10", "2018-08-15"]),
