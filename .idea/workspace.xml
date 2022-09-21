@@ -38,12 +38,12 @@
           <entry key="Procfile" value="10" />
           <entry key="gitignore" value="4" />
           <entry key="py" value="368" />
-          <entry key="txt" value="5" />
+          <entry key="txt" value="7" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="19" />
+          <entry key="PLAIN_TEXT" value="21" />
           <entry key="Python" value="368" />
         </counts>
       </usages-collector>
