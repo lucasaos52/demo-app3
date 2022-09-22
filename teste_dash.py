@@ -6665,6 +6665,8 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],
                             'content': 'width=device-width, initial-scale=1.0'}]
                 )
 
+server = app.server
+
 lv = LowVol(index='IBX', country='brazil', type_trades=["long", "short"], flag_signal=False, local_database=True,
             dict_param='gss', nbin=7, backtest_di=True)
 df_params_pure, df_params_full_pure, tam_rank_in, tam_rank_out = lv.get_data()
@@ -7044,4 +7046,5 @@ def update_graph(jsonified_cleaned_data):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8000)
+    #app.run_server(debug=True, port=8000)
+    app.run_server(debug=True)
