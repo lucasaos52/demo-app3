@@ -6986,7 +6986,6 @@ def clean_data(if_click, n_inter, sim_var, imab5p_w, imab5_w, dipre_w, cdi_w, rv
 
     return df.to_json()
 
-
 ################################# UPDATING NONE DIV ##########################
 
 
@@ -6995,7 +6994,11 @@ def clean_data(if_click, n_inter, sim_var, imab5p_w, imab5_w, dipre_w, cdi_w, rv
 @app.callback(
     Output('line-fig', 'figure'),
     Input('intermediate-value', 'children'))
+
 def update_graph(jsonified_cleaned_data):
+
+    print(" veio tentar ler lendo primeiro")
+
     dff = pd.read_json(jsonified_cleaned_data)
 
     print("lendo primeiro")
@@ -7014,8 +7017,17 @@ def update_graph(jsonified_cleaned_data):
 @app.callback(
     Output('line-fig2', 'figure'),
     Input('intermediate-value', 'children'))
+
 def update_graph(jsonified_cleaned_data):
+
+    print(" veio tentar ler lendo primeiro 22")
+
     dff = pd.read_json(jsonified_cleaned_data)
+
+    print(" veio tentar ler lendo primeiro 22")
+
+    print(dff)
+
     dff = generae_statistcs_interface(dff.drop("cota_cdi", axis=1), dff[["date", "cota_cdi"]], ret_dd=True)
     figln2 = ploty_basic_API(dff, "date", dff.columns.tolist()[1:], x_title='Date', y_title='MaxDD(%)',
                              title="Fund's MaxDrawdown over time")
