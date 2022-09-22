@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="26a2b999-fb96-4760-b39a-2de6156aa3e9" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sdgsd.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/teste_dash.py" beforeDir="false" afterPath="$PROJECT_DIR$/teste_dash.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -14,18 +17,19 @@
     <session id="-1141509579">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="1" />
+          <entry key="project.closed" value="2" />
           <entry key="project.open.time.0" value="1" />
           <entry key="project.open.time.18" value="1" />
+          <entry key="project.open.time.3" value="1" />
           <entry key="project.open.time.38" value="1" />
-          <entry key="project.opened" value="3" />
+          <entry key="project.opened" value="4" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="Procfile" value="2" />
           <entry key="gitignore" value="1" />
-          <entry key="py" value="3" />
+          <entry key="py" value="5" />
           <entry key="pyi" value="1" />
           <entry key="txt" value="9" />
         </counts>
@@ -33,7 +37,7 @@
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="PLAIN_TEXT" value="12" />
-          <entry key="Python" value="3" />
+          <entry key="Python" value="5" />
           <entry key="PythonStub" value="1" />
         </counts>
       </usages-collector>
@@ -41,36 +45,49 @@
         <counts>
           <entry key="Procfile" value="25" />
           <entry key="gitignore" value="4" />
-          <entry key="py" value="1006" />
+          <entry key="py" value="1721" />
           <entry key="txt" value="7" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="36" />
-          <entry key="Python" value="1006" />
+          <entry key="Python" value="1721" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/sdgsd.py">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/teste_dash.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state>
+            <state relative-caret-position="457">
+              <caret line="7093" column="4" selection-start-line="7093" selection-start-column="4" selection-end-line="7093" selection-end-column="4" />
               <folding>
-                <element signature="e#0#29#0" expanded="true" />
+                <element signature="e#0#9#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/teste_dash.py">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/debugg.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="7090" column="4" selection-start-line="7090" selection-start-column="4" selection-end-line="7090" selection-end-column="4" />
+            <state relative-caret-position="195">
+              <caret line="5088" column="345" lean-forward="true" selection-start-line="5088" selection-start-column="4" selection-end-line="5088" selection-end-column="345" />
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/vv.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="68">
+              <caret line="4" column="15" selection-start-line="4" selection-start-column="15" selection-end-line="4" selection-end-column="15" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -106,8 +123,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/requirements.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="22" column="20" selection-start-line="22" selection-start-column="20" selection-end-line="22" selection-end-column="20" />
+            <state relative-caret-position="421">
+              <caret line="36" column="3" selection-start-line="36" selection-end-line="36" selection-end-column="3" />
             </state>
           </provider>
         </entry>
@@ -116,28 +133,10 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>compute_all</find>
-      <find>groupby</find>
-      <find>chain</find>
-      <find>read_sql</find>
-      <find>aah</find>
-      <find>conect_database</find>
-      <find>self.sql_con =</find>
-      <find>self.sql_con</find>
-      <find>composition_anual</find>
-      <find>get_indexCompos</find>
-      <find>self.df_indice</find>
-      <find>scip</find>
-      <find>stats</find>
-      <find>server</find>
-      <find>app</find>
-      <find>fig3</find>
-      <find>192</find>
       <find>date_range</find>
       <find>clean_data</find>
       <find>main</find>
       <find>__main__</find>
-      <find>intermediate-value</find>
       <find>aloha</find>
       <find>server = app.server</find>
       <find>time.sl</find>
@@ -146,6 +145,24 @@
       <find>dcc.store</find>
       <find>run_server</find>
       <find>.to_json</find>
+      <find>testando jsonnify</find>
+      <find>stats</find>
+      <find>from_dlpack</find>
+      <find>num</find>
+      <find>Portfolio Simulator</find>
+      <find>time.sleep(2)</find>
+      <find>time.sleep</find>
+      <find>time</find>
+      <find>lv =</find>
+      <find>intermediate-value</find>
+      <find>sim_var</find>
+      <find>dff = generae_statistcs_interface(dff.drop(&quot;</find>
+      <find>_df2[&quot;Avg_Improvement&quot;] = _df2.apply(</find>
+      <find>_df2[&quot;Avg_Improvement&quot;]</find>
+      <find>KKKKKKKKK</find>
+      <find>PRIMEIRO</find>
+      <find>AFTER 1</find>
+      <find>avg_im</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -158,13 +175,15 @@
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/requirements.txt" />
         <option value="$PROJECT_DIR$/Procfile" />
+        <option value="$PROJECT_DIR$/vv.py" />
+        <option value="$PROJECT_DIR$/debugg.py" />
         <option value="$PROJECT_DIR$/teste_dash.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="2271" />
-    <option name="y" value="-23" />
+    <option name="x" value="-330" />
+    <option name="y" value="176" />
     <option name="width" value="1400" />
     <option name="height" value="1000" />
   </component>
@@ -190,6 +209,12 @@
               <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
               <item name="&lt; Python 3.7 &gt;" type="70bed36:NamedLibraryElementNode" />
             </path>
+            <path>
+              <item name="untitled9" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="&lt; Python 3.7 &gt;" type="70bed36:NamedLibraryElementNode" />
+              <item name="site-packages" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -213,6 +238,27 @@
     </option>
   </component>
   <component name="RunManager" selected="Python.teste_dash">
+    <configuration name="debugg" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="untitled9" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/debugg.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="sdgsd" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="untitled9" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -255,13 +301,38 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="vv" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="untitled9" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/vv.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Python.sdgsd" />
       <item itemvalue="Python.teste_dash" />
+      <item itemvalue="Python.vv" />
+      <item itemvalue="Python.debugg" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.teste_dash" />
+        <item itemvalue="Python.debugg" />
+        <item itemvalue="Python.vv" />
         <item itemvalue="Python.sdgsd" />
       </list>
     </recent_temporary>
@@ -289,22 +360,22 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="1912" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14330874" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.20706007" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49947312" visible="true" weight="0.4273319" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.7471022" weight="0.26898047" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.329718" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.37960956" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.329718" />
-      <window_info anchor="bottom" id="Terminal" order="8" weight="0.28416485" />
-      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.50052685" side_tool="true" weight="0.26030368" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.6459431" visible="true" weight="0.27440348" />
+      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.2528978" side_tool="true" weight="0.35140997" />
       <window_info anchor="bottom" id="Python Console" order="10" weight="0.30477223" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -318,15 +389,7 @@
     <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python39/Lib/site-packages/dash/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/sdgsd.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#29#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/sdgsd.py" />
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/typeshed/stdlib/2and3/datetime.pyi">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -346,17 +409,37 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/vv.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="4" column="15" selection-start-line="4" selection-start-column="15" selection-end-line="4" selection-end-column="15" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/debugg.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="5088" column="345" lean-forward="true" selection-start-line="5088" selection-start-column="4" selection-end-line="5088" selection-end-column="345" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/requirements.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="22" column="20" selection-start-line="22" selection-start-column="20" selection-end-line="22" selection-end-column="20" />
+        <state relative-caret-position="421">
+          <caret line="36" column="3" selection-start-line="36" selection-end-line="36" selection-end-column="3" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/teste_dash.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="7090" column="4" selection-start-line="7090" selection-start-column="4" selection-end-line="7090" selection-end-column="4" />
+        <state relative-caret-position="457">
+          <caret line="7093" column="4" selection-start-line="7093" selection-start-column="4" selection-end-line="7093" selection-end-column="4" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>

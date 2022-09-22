@@ -1,12 +1,23 @@
-from datetime import datetime
-import pandas as pd
-import numpy as np
-from math import log,sqrt,degrees,atan
-import collections
-from sqlalchemy import create_engine
+import os
 import sys
+import dash
+from dash import dcc, html, dash_table
+from dash.dependencies import Output, Input, State
+import dash_bootstrap_components as dbc
+import pandas as pd
+from datetime import datetime
+import plotly.graph_objs as go
+from math import log, sqrt, degrees, atan
+import collections
 from functools import reduce
+import site
+from sqlalchemy import create_engine
+from itertools import groupby
+from itertools import chain
+import numpy as np
 
+
+print("hello")
 
 # calcula o retorno perceuntual de um ativo (close)
 def calc_return_price(df, lista_return):
@@ -351,41 +362,6 @@ def compute_all(df_desc,
                 col_vol_entropy=None,
                 mode_entropy=1
                 ):
-    from math import log, sqrt, degrees, atan
-    import numpy as np
-    import time
-    from math import log, sqrt, degrees, atan
-    import numpy as np
-    from scipy import stats
-
-    # add autocorr with p value
-    def add_AutoCorr_Sperman(df, col, lag, window=250):
-
-        pr = df[col].tolist()
-        lista_autocorr = []
-        lista_autocorr_p = []
-        for i in range(len(pr)):
-
-            # print("o i : {}".format(i))
-
-            try:
-                res = stats.spearmanr(pr[i:(i + window)], pr[(i + lag):(i + lag + window)])
-                corr = res[0]
-                pval = res[1]
-
-                lista_autocorr.append(corr)
-                lista_autocorr_p.append(pval)
-
-
-            except:
-
-                lista_autocorr.append(None)
-                lista_autocorr_p.append(None)
-
-        df["autocorr_{}_{}_{}".format(col, window, lag)] = lista_autocorr
-        df["PvalAutocorr_{}_{}_{}".format(col, window, lag)] = lista_autocorr_p
-
-        return df
 
     def add_cum_AutoCorr(df, col, lag):
 
@@ -543,7 +519,6 @@ def compute_all(df_desc,
 
                 for lag in lista_lags_auto:
                     df_desc = add_AutoCorr_Sperman(df_desc, col, lag, window=window)
-
 
     # evita ficar fazendo sort em dataframes
     if (betas | ma | excess_return | calc_std | if_sum | rollmax | flag_autocorr):
@@ -1026,15 +1001,339 @@ def filter_Nticks(df_params, min_tick, max_ticks):
     return df_params
 
 
+class Gen_Statistics():
+    '''
+    input: lista longs, short de resultados anuais
+
+    output: lista de stats,  e lista de res anuais
+
+    '''
+
+    def duration_drawdown(self, df2, col="pnl_total"):
+
+        df = df2.copy()
+
+        df['acc'] = df[col].cumsum()
+        df['acc'] = df['acc'] - df['acc'].cummax()
+
+        df['duration'] = list(chain.from_iterable((np.arange(len(list(j))) + 1).tolist() if i == 1 \
+                                                      else [0] * len(list(j)) for i, j in groupby(df['acc'] != 0)))
+
+        return df["duration"].max() + 1
+
+    def gen_stats(self, anual_long, anual_short, pais='brazil'):
+
+        long = anual_long.copy().drop(["param"], axis=1)[["year", "n_trades", "pnl_total"]]
+        short = anual_short.copy().drop(["param"], axis=1)[["year", "n_trades", "pnl_total"]]
+
+        long.columns = ['year', 'n_trades_long', 'pnl_total_long']
+        short.columns = ['year', 'n_trades_short', 'pnl_total_short']
+
+        long_short = pd.merge(long, short, left_on=["year"], right_on=["year"], how="outer").copy()
+
+        long_short["n_trades_long"] = long_short["n_trades_long"].fillna(0)
+        long_short["n_trades_short"] = long_short["n_trades_short"].fillna(0)
+
+        long_short["pnl_total_long"] = long_short["pnl_total_long"].fillna(0)
+        long_short["pnl_total_short"] = long_short["pnl_total_short"].fillna(0)
+
+        long_short["n_trades"] = long_short["n_trades_long"] + long_short["n_trades_short"]
+        long_short["pnl_total"] = long_short["pnl_total_long"] + long_short["pnl_total_short"]
+
+        long_short = long_short[["year", "n_trades", "pnl_total"]]
+
+        # filtering year control
+        long_short = long_short[long_short["year"] != 2030]
+
+        dur = self.duration_drawdown(long_short, col="pnl_total")
+
+        param = anual_long["param"].iloc[0]
+        npos = long_short[long_short["pnl_total"] > 0].__len__()
+
+        mean_pos = long_short[long_short["pnl_total"] > 0]["pnl_total"].mean()
+        mean_neg = long_short[long_short["pnl_total"] < 0]["pnl_total"].mean()
+        pnl_total = long_short["pnl_total"].sum()
+        pnl_total_long = long["pnl_total_long"].sum()
+        pnl_total_short = short["pnl_total_short"].sum()
+        n_trades = long_short["n_trades"].sum()
+        pnl_trade = 100 * ((pnl_total / n_trades) / 100000)
+        ratio = 100 * (npos / long_short.__len__())
+
+        stats = pd.DataFrame({"pnl_total": [pnl_total],
+                              "pnl_total_long": [pnl_total_long],
+                              "pnl_total_short": [pnl_total_short],
+                              "n_trades": [n_trades],
+                              "pnl/trade(%)": [pnl_trade],
+                              "pos/total(%)": [ratio],
+                              # "mean_pos":[mean_pos],
+                              # "mean_neg":[mean_neg],
+                              "mean_pos/mean_neg": [mean_pos / abs(mean_neg)]
+                                 , "duration_drawdown(Y)": [dur]
+                              })
+
+        # stats["pais"] = pais
+        stats["param"] = param
+        # print("gerando o status:")
+        long_short.columns = ["year", "n_trades", "pnl_total_{}".format(pais)]
+        long_short = long_short[["year", "pnl_total_{}".format(pais)]]
+
+        return long_short, stats
+
+    def gen_partial(self, rep_temp11):
+
+        rep_temp11["pnl_acc"] = rep_temp11["pnl_total"].cumsum()
+        rep_temp11["max_so_far"] = rep_temp11["pnl_acc"].cummax()
+        rep_temp11["top_to_current"] = 100 * (rep_temp11["pnl_acc"] / rep_temp11["max_so_far"] - 1)
+        rep_temp11["top_to_current"] = rep_temp11["top_to_current"].apply(lambda x: x if x < 0 else 0)
+
+        lista_draws = []
+        lista_pos = []
+
+        daily_draw_max = rep_temp11["pnl_total"].min()
+        daily_pos_max = rep_temp11["pnl_total"].max()
+
+        lista_draws.append(rep_temp11["top_to_current"].min())
+        for w in [30, 250, 750]:
+            rep_temp11["DD_{}".format(w)] = rep_temp11["pnl_total"].rolling(w).sum()
+            lista_draws.append(rep_temp11["DD_{}".format(w)].min())
+
+        for w in [30, 250, 750]:
+            rep_temp11["DD_{}".format(w)] = rep_temp11["pnl_total"].rolling(w).sum()
+            lista_pos.append(rep_temp11["DD_{}".format(w)].max())
+
+        rep_temp11["month"] = rep_temp11["date"].apply(lambda x: x.month)
+        rep_temp11["year"] = rep_temp11["date"].apply(lambda x: x.year)
+
+        mes = rep_temp11.groupby(["month", "year"]).agg({"pnl_total": "sum"}).reset_index()
+        ano = rep_temp11.groupby(["year"]).agg({"pnl_total": "sum"}).reset_index()
+
+        sharpe_mes = mes["pnl_total"].mean() / mes["pnl_total"].std(ddof=1)
+        sharpe_ano = ano["pnl_total"].mean() / ano["pnl_total"].std(ddof=1)
+
+        return sharpe_ano, sharpe_mes, lista_draws[0], lista_draws[1], lista_draws[2], lista_draws[3], lista_pos[0], \
+               lista_pos[1], lista_pos[2], daily_draw_max, daily_pos_max
+
+    def gen_statistcs_daily(self, rep):
+
+        def get_avg_time(rep1):
+
+            first = rep1.sort_values("date")["signal"].iloc[0]
+            temp = rep1[(rep1["signal"] == first) | (pd.isnull(rep1["signal"]))]
+            temp_signal = temp[temp["signal"] == first]
+            tam_all = temp.__len__()
+            tam_sigs = temp_signal.__len__()
+
+            avg_time_trade_days = round(tam_all / tam_sigs)
+
+            if first == 1:
+
+                name = 'long'
+
+            else:
+
+                name = 'short'
+
+            return avg_time_trade_days, name
+
+        lista_avg_time = []
+        lista_name = []
+        lista_notional_long = []
+        lista_notional_short = []
+
+        if ((not isinstance(rep, list)) | (isinstance(rep, list) & (len(rep) == 1))):
+
+            if isinstance(rep, list):
+                rep = rep[0]
+
+            else:
+                pass
+
+            first = rep.sort_values("date")["signal"].iloc[0]
+            rep_temp1 = rep.copy()
+            avg_time, name = get_avg_time(rep_temp1)
+            lista_avg_time.append(avg_time)
+            lista_name.append(name)
+            rep_temp1["notional"] = rep_temp1["close"] * rep_temp1["qtty"]
+
+            mean_notional = \
+            rep_temp1[(pd.isnull(rep_temp1["signal"])) | (rep_temp1["signal"] == first)].groupby("date").agg(
+                {"notional": "sum"}).reset_index()["notional"].mean()
+            first = rep_temp1.sort_values("date")["signal"].iloc[0]
+
+            if first == 1:
+
+                lista_notional_long.append(mean_notional)
+                lista_notional_short.append(0)
+                avg_time_long = avg_time
+                avg_time_short = None
+
+            else:
+
+                lista_notional_short.append(0)
+                lista_notional_long.append(mean_notional)
+                avg_time_short = avg_time
+                avg_time_long = None
+
+            rep_temp11 = rep_temp1.groupby("date").agg({"pnl_total": "sum"}).reset_index()
+
+
+        else:
+
+            i = 0
+            for rep_temp in rep:
+
+                rep_temp["notional"] = rep_temp["close"] * rep_temp["qtty"]
+                first = rep_temp.sort_values("date")["signal"].iloc[0]
+                mean_notional = \
+                rep_temp[(pd.isnull(rep_temp["signal"])) | (rep_temp["signal"] == first)].groupby("date").agg(
+                    {"notional": "sum"}).reset_index()["notional"].mean()
+                avg_time, name = get_avg_time(rep_temp)
+                lista_avg_time.append(avg_time)
+                lista_name.append(name)
+
+                len_5_pct = round(rep_temp["ticker"].unique().__len__() * 0.03)
+                tops = rep_temp.groupby("ticker").agg({"pnl_total": "sum"}).reset_index().sort_values("pnl_total",
+                                                                                                      ascending=False).iloc[
+                       0:len_5_pct]["pnl_total"].sum()
+                total_pnl_temp = rep_temp["pnl_total"].sum()
+                mins = rep_temp.groupby("ticker").agg({"pnl_total": "sum"}).reset_index().sort_values("pnl_total",
+                                                                                                      ascending=True).iloc[
+                       0:len_5_pct]["pnl_total"].sum()
+
+                if abs(total_pnl_temp) > 0:
+                    concen_5 = 100 * (tops / (abs(total_pnl_temp)))
+                    min_concen_5 = 100 * (mins / (abs(total_pnl_temp)))
+
+                else:
+
+                    concen_5 = 0
+                    min_concen_5 = 0
+
+                # se long
+                if first == 1:
+
+                    notional_long = mean_notional
+                    avg_time_long = avg_time
+                    max_long = concen_5
+                    min_long = min_concen_5
+
+                # se short
+                else:
+
+                    # print("veio no time shoooooooooooooort")
+                    notional_short = mean_notional
+                    avg_time_short = avg_time
+                    max_short = concen_5
+                    min_short = min_concen_5
+
+                if i == 0:
+
+                    rep_temp1 = rep_temp[["date", "pnl_total", "notional"]].copy()
+                    rep_temp1 = rep_temp1.groupby("date").agg({"pnl_total": "sum", "notional": "sum"}).reset_index()
+                    rep_temp1.columns = ["date", "pnl_total_1", "notional_1"]
+                    one = rep_temp1.copy()
+
+                else:
+
+                    two = rep_temp[["date", "pnl_total", "notional"]].copy()
+                    two = two.groupby("date").agg({"pnl_total": "sum", "notional": "sum"}).reset_index()
+                    two.columns = ["date", "pnl_total_2", "notional_2"]
+
+                    self.rep_temp1 = rep_temp1.copy()
+                    self.two = two.copy()
+
+                    rep_temp1 = pd.merge(rep_temp1, two, left_on=["date"], right_on=["date"], how="outer")
+                    # rep_temp1.columns = ["date","pnl_total_1","pnl_total_2"]
+                    rep_temp1.columns = ["date", "pnl_total_1", "notional_1", "pnl_total_2", "notional_2"]
+                    rep_temp1["pnl_total"] = rep_temp1["pnl_total_1"] + rep_temp1["pnl_total_2"]
+
+                i += 1
+
+            rep_temp1["pnl_total"] = rep_temp1["pnl_total_1"] + rep_temp1["pnl_total_2"]
+            rep_temp1["pnl_total_1"] = rep_temp1["pnl_total_1"].fillna(0)
+            rep_temp1["pnl_total_2"] = rep_temp1["pnl_total_2"].fillna(0)
+
+            rep_temp1["notional_1"] = rep_temp1["notional_1"].fillna(0)
+            rep_temp1["notional_2"] = rep_temp1["notional_2"].fillna(0)
+
+            rep_temp1["pnl_total"] = rep_temp1["pnl_total_1"] + rep_temp1["pnl_total_2"]
+            rep_temp1 = rep_temp1[rep_temp1["date"] != datetime(2030, 1, 1).date()]
+
+            self.cc = rep_temp1.copy()
+
+            self.cc["delta"] = self.cc["notional_1"] + self.cc["notional_2"]
+
+            avg_delta_short = self.cc[self.cc["delta"] < 0]["delta"].mean()
+            avg_delta_long = self.cc[self.cc["delta"] > 0]["delta"].mean()
+            avg_timPos_long = 100 * (self.cc[self.cc["delta"] > 0].__len__() / (self.cc.__len__()))
+
+            rep_temp11 = rep_temp1.groupby("date").agg({"pnl_total": "sum"}).reset_index()
+
+        return avg_time_long, avg_time_short, lista_name, notional_long, notional_short, rep_temp11, max_long, max_short, min_long, min_short, avg_delta_short, avg_delta_long, avg_timPos_long
+
+    def gen_full_stats(self, anual_long, anual_short, daily_long, daily_short):
+
+        a = [daily_long, daily_short]
+        # a = [rep,rep]
+
+        avg_time_long, avg_time_short, lista_name, notional_long, notional_short, rep_temp11, max_long, max_short, min_long, min_short, avg_delta_short, avg_delta_long, avg_timPos_long = self.gen_statistcs_daily(
+            a)
+
+        self.rep_temp11 = rep_temp11.copy()
+
+        sharpe_ano, sharpe_mes, top_to_current, d0, d1, d2, p0, p1, p2, daily_draw_max, daily_pos_max = self.gen_partial(
+            rep_temp11)
+
+        res_anuais, res_stats = self.gen_stats(anual_long, anual_short)
+
+        # avg_delta_short,avg_delta_long,avg_time_long
+
+        res_stats2 = pd.DataFrame({"sharpe_ano": [sharpe_ano],
+                                   "sharpe_mes": [sharpe_mes],
+                                   "avg_days_long": [avg_time_long],
+                                   "avg_days_short": [avg_time_short],
+                                   "avg_notional_long": [notional_long],
+                                   "avg_notional_short": [notional_short],
+                                   "max_daily_p&L": [daily_pos_max],
+                                   "min_daily_p&L": [daily_draw_max],
+                                   "Min_Top_to_Crnt(%)": [top_to_current],
+                                   "roll_MinP&L_30D": [d0],
+                                   "roll_MinP&L_250D": [d1],
+                                   "roll_MinP&L_750D": [d2],
+                                   "roll_MaxP&L_30D": [p0],
+                                   "roll_MaxP&L_250D": [p1],
+                                   "roll_MaxP&L_750D": [p2],
+                                   "3%Ticker_long_POS": [max_long],
+                                   "3%Ticker_long_NEG": [min_long],
+                                   "3%Ticker_short_POS": [max_short],
+                                   "3%Ticker_short_NEG": [min_short],
+                                   "avg_delta_long": [avg_delta_long],
+                                   "avg_delta_short": [avg_delta_short],
+                                   "avg_Period_long(%)": [avg_timPos_long]
+                                   })
+
+        res_stats2 = pd.concat([res_stats, res_stats2], axis=1)
+        res_stats2.drop("param", axis=1, inplace=True)
+        res_stats2["kelly_C"] = res_stats2.apply(
+            lambda x: ((x['pos/total(%)'] / 100) * x['mean_pos/mean_neg'] - (1 - (x['pos/total(%)'] / 100))) / x[
+                'mean_pos/mean_neg'], axis=1)
+        return res_stats2, res_anuais
+
+
 # from enterpython.tools import compute_vol
-class Base_model():
+class bm():
 
     def __init__(self):
 
         self.sql_con = self.conect_database("backtesting")
 
     def conect_database(self, schema):
-        mysql_con = create_engine("mysql+pymysql://administrator:Enter123@192.168.0.5/{}".format(schema))
+
+        host = "administrator.cpmflhyn4h6k.us-east-1.rds.amazonaws.com"
+        pwd = "enteraws123&"
+        user = "administrator"
+        mysql_con  = create_engine("mysql+pymysql://{}:{}@{}/{}".format(user, pwd, host, schema))
+
         return mysql_con
 
     def aux_live_update(self):
@@ -1265,7 +1564,7 @@ class Base_model():
 
 
 
-        # Só está implementado para brasil !. Retorna os precos de todos os ticker que estao no no indice nos respectivos anos. Utilizad-se a tabela de composicao anual. 
+        # Só está implementado para brasil !. Retorna os precos de todos os ticker que estao no no indice nos respectivos anos. Utilizad-se a tabela de composicao anual.
         else:
 
             if not flag_crowd:
@@ -2909,7 +3208,7 @@ class Base_model():
 
                 # Nao rebalanceia ! Mantêm as posicoes do dia anterior.
                 else:
-                    # verifico apenas variavel de controle em dias foras da data de rebalance. 
+                    # verifico apenas variavel de controle em dias foras da data de rebalance.
                     for el_pos in range(len(pos)):
                         # print("veio onde não a rebalnce")
                         # 3.1: Verifica  se houve vendas.
@@ -2946,7 +3245,7 @@ class Base_model():
 
         df_final = pd.DataFrame({"date": datas_full, "ticker": lista_lista_pos, "signals": signals_full})
 
-        # vende na zerada da estratégia(data maxima). Zera caso haja posicoa. Pode nao haver caso a estratégia tivesse 
+        # vende na zerada da estratégia(data maxima). Zera caso haja posicoa. Pode nao haver caso a estratégia tivesse
         # sido desligada antes por conta de outros motivos
         _temp = df_final[df_final["date"] != max_date]
         _temp2 = df_final[df_final["date"] == max_date]
@@ -3133,7 +3432,7 @@ class Base_model():
 
                 # Nao rebalanceia ! Mantêm as posicoes do dia anterior.
                 else:
-                    # verifico apenas variavel de controle em dias foras da data de rebalance. 
+                    # verifico apenas variavel de controle em dias foras da data de rebalance.
                     for el_pos in range(len(pos)):
                         # print("veio onde não a rebalnce")
                         # 3.1: Verifica  se houve vendas.
@@ -3170,7 +3469,7 @@ class Base_model():
 
         df_final = pd.DataFrame({"date": datas_full, "ticker": lista_lista_pos, "signals": signals_full})
 
-        # vende na zerada da estratégia(data maxima). Zera caso haja posicoa. Pode nao haver caso a estratégia tivesse 
+        # vende na zerada da estratégia(data maxima). Zera caso haja posicoa. Pode nao haver caso a estratégia tivesse
         # sido desligada antes por conta de outros motivos
         _temp = df_final[df_final["date"] != max_date]
         _temp2 = df_final[df_final["date"] == max_date]
@@ -3376,7 +3675,7 @@ class Base_model():
 
                 # Nao rebalanceia ! Mantêm as posicoes do dia anterior.
                 else:
-                    # verifico apenas variavel de controle em dias foras da data de rebalance. 
+                    # verifico apenas variavel de controle em dias foras da data de rebalance.
                     for el_pos in range(len(pos)):
                         # print("veio onde não a rebalnce")
                         # 3.1: Verifica  se houve vendas.
@@ -3413,7 +3712,7 @@ class Base_model():
 
         df_final = pd.DataFrame({"date": datas_full, "ticker": lista_lista_pos, "signals": signals_full})
 
-        # vende na zerada da estratégia(data maxima). Zera caso haja posicoa. Pode nao haver caso a estratégia tivesse 
+        # vende na zerada da estratégia(data maxima). Zera caso haja posicoa. Pode nao haver caso a estratégia tivesse
         # sido desligada antes por conta de outros motivos
         _temp = df_final[df_final["date"] != max_date]
         _temp2 = df_final[df_final["date"] == max_date]
@@ -4038,7 +4337,7 @@ class Base_model():
 
                 # Nao rebalanceia ! Mantêm as posicoes do dia anterior.
                 else:
-                    # verifico apenas variavel de controle em dias foras da data de rebalance. 
+                    # verifico apenas variavel de controle em dias foras da data de rebalance.
                     for el_pos in range(len(pos)):
                         # print("veio onde não a rebalnce")
                         # 3.1: Verifica  se houve vendas.
@@ -4075,7 +4374,7 @@ class Base_model():
 
         df_final = pd.DataFrame({"date": datas_full, "ticker": lista_lista_pos, "signals": signals_full})
 
-        # vende na zerada da estratégia(data maxima). Zera caso haja posicoa. Pode nao haver caso a estratégia tivesse 
+        # vende na zerada da estratégia(data maxima). Zera caso haja posicoa. Pode nao haver caso a estratégia tivesse
         # sido desligada antes por conta de outros motivos
         _temp = df_final[df_final["date"] != max_date]
         _temp2 = df_final[df_final["date"] == max_date]
@@ -4303,7 +4602,7 @@ class Base_model():
         # flag das vendas
         _temp2['flag_casflow'] = np.where(_temp2['signal'] == module, True, False)
 
-        # flag das compras 
+        # flag das compras
         _temp3["flag_casflow"] = False
         _temp4["flag_casflow"] = True
 
@@ -4530,5 +4829,1898 @@ def generate_list_chunks(self, _df_params, _df_params_full, period_reset):
         return df_cashflow
 
 
-if __name__ == '__main__':
-    t = Base_model()
+def generae_statistcs_interface(temp, cota_cdi, ret_dd=False):
+    lista_res = []
+    lista_res_dd = []
+    lista_res2 = []
+    lista_names = ['Total Return', 'CDI+', 'Pos/Total-Y(%)-roll(nominal)',
+                   '(months > CDI)/total', 'Sharpe(M)', 'Sharpe(250d)', 'Kelly_C(250d)',
+                   'MMD(%)', 'Worst_750D', 'Worst_250D', 'Min_Daily(%)', 'Max_Recover(days)'
+                   ]
+
+    cols = temp.columns.tolist()[1:]
+    cols = [el for el in cols if el != 'month']
+    lista_shift = [22, 252]
+    for col in cols[:]:
+
+        # print(" a coluna :{}".format(col))
+
+        temp2 = temp[["date", col]].copy()
+        temp2 = pd.merge(temp2, cota_cdi, left_on=["date"], right_on=["date"], how="inner")
+        temp2["month"] = temp2["date"].apply(lambda x: x.month)
+        temp2[col] = temp2[col] / temp2[col].iloc[0]
+        temp2["cota_cdi"] = temp2["cota_cdi"] / temp2["cota_cdi"].iloc[0]
+
+        for w in lista_shift:
+            temp2["shift_{}".format(w)] = temp2[col].shift(w)
+            temp2["shift_{}_cdi".format(w)] = temp2["cota_cdi"].shift(w)
+
+            temp2["return_nom_{}".format(w)] = temp2[col] / temp2["shift_{}".format(w)] - 1
+            temp2["return_CDI_{}".format(w)] = temp2["cota_cdi"] / temp2["shift_{}_cdi".format(w)] - 1
+            # temp2["return_nom_{}".format(w)] = temp2[col]/temp2["shift_{}".format(w)]-1
+
+            temp2["excess_return_{}".format(w)] = temp2["return_nom_{}".format(w)] - temp2["return_CDI_{}".format(w)]
+
+        temp2["cota_sobre_cdi"] = temp2[col] / temp2["cota_cdi"]
+
+        temp2["close_d-1"] = temp2[col].shift(1)
+        temp2["close_d-1"] = temp2["close_d-1"].fillna(method="bfill")
+
+        temp2["close_d-1_cdi"] = temp2["cota_cdi"].shift(1)
+        temp2["close_d-1_cdi"] = temp2["close_d-1_cdi"].fillna(method="bfill")
+
+        temp2["log_return"] = sqrt(252) * (np.log(temp2[col]) - np.log(temp2["close_d-1"]))
+
+        temp2["pnl_cdi"] = temp2["cota_cdi"] - temp2["close_d-1_cdi"]
+
+        temp2["pnl"] = temp2[col] - temp2["close_d-1"]
+
+        # calc DD norminal
+        temp2["rollmax"] = temp2[col].cummax()
+        temp2["rel_to_max"] = 100 * (temp2[col] / temp2["rollmax"] - 1)
+        temp2["drawdown"] = temp2["rel_to_max"].apply(lambda x: x if x < 0 else 0)
+
+        # calc DD CDI
+        temp2["rollmax_CDI"] = temp2["cota_sobre_cdi"].cummax()
+        temp2["rel_to_max_CDI"] = 100 * (temp2["cota_sobre_cdi"] / temp2["rollmax_CDI"] - 1)
+        temp2["drawdown_CDI"] = temp2["rel_to_max_CDI"].apply(lambda x: x if x < 0 else 0)
+
+        temp2["daily_excess_return"] = temp2["pnl"] - temp2["pnl_cdi"]
+
+        # 1) retorno total nominal
+        retorno_norminal = 100 * (temp2[temp2["date"] == temp2["date"].max()].iloc[0][col] / 1 - 1)
+
+        # 2) rendimento acima do CDI
+        val_abova_cdi = 100 * (temp2[temp2["date"] == temp2["date"].max()].iloc[0][col] -
+                               temp2[temp2["date"] == temp2["date"].max()].iloc[0]["cota_cdi"])
+
+        # 3)
+        max_drawdow = (temp2["drawdown"].min())
+
+        # 4)
+        min_daily = 100 * (temp2["pnl"].min())
+
+        # 5)
+        max_daily = 100 * (temp2["pnl"].max())
+
+        # 6)
+        sharpe_250d = (252 * temp2["daily_excess_return"].mean()) / (
+                    np.sqrt(252) * np.std(temp2["daily_excess_return"]))
+
+        # 7 vol
+        vol_252 = 100 * (np.std(temp2["log_return"].tolist(), ddof=1))
+
+        ################################################ RECOVERY dawdown NOMINAL
+        ds = temp2["drawdown"].tolist()
+        lista_rec = []
+        cc = 0
+        for i in range(len(ds)):
+
+            if ds[i] == 0:
+
+                lista_rec.append(cc)
+                cc = 0
+
+            else:
+
+                cc += 1
+
+        if cc > 0:
+            lista_rec.append(cc)
+
+        lista_rec = [el for el in lista_rec if el != 0]
+
+        # 7)
+        max_rec_dd = max(lista_rec)
+
+        # 8)
+        mean_rec_dd = np.mean(lista_rec)
+
+        ################################################ RECOVERY dawdown CDI
+
+        ds = temp2["drawdown_CDI"].tolist()
+        lista_rec = []
+        cc = 0
+        for i in range(len(ds)):
+
+            if ds[i] == 0:
+
+                lista_rec.append(cc)
+                cc = 0
+
+            else:
+
+                cc += 1
+
+        if cc > 0:
+            lista_rec.append(cc)
+
+        lista_rec = [el for el in lista_rec if el != 0]
+
+        # 7)
+        max_rec_dd_cdi = max(lista_rec)
+
+        # 8)
+        mean_rec_dd_cdi = np.mean(lista_rec)
+
+        ################################################ RECOVERY dawdown CDI
+
+        # 9) meses acima cdi
+        meses_acima_cdi_perc = 100 * (temp2[temp2["excess_return_{}".format(22)] > 0].__len__() / temp2.__len__())
+
+        # 10) anos (252) acima CDI
+        anos_acima_cdi_perc = 100 * (temp2[temp2["excess_return_{}".format(252)] > 0].__len__() / temp2.__len__())
+
+        #################### PARA O KELLY
+        # 11) meses > 0
+        PERC_POS_MES = 100 * (temp2[temp2["return_nom_{}".format(22)] > 0].__len__() / temp2.__len__())
+        MEAN_POS_MES = abs(temp2[temp2["return_nom_{}".format(22)] > 0]["return_nom_{}".format(22)].mean()) / abs(
+            temp2[temp2["return_nom_{}".format(22)] <= 0]["return_nom_{}".format(22)].mean())
+
+        PERC_POS_ANO = 100 * (temp2[temp2["return_nom_{}".format(252)] > 0].__len__() / temp2.__len__())
+        MEAN_POS_ANO = abs(temp2[temp2["return_nom_{}".format(252)] > 0]["return_nom_{}".format(252)].mean()) / abs(
+            temp2[temp2["return_nom_{}".format(252)] <= 0]["return_nom_{}".format(252)].mean())
+
+        kelly_mes = ((PERC_POS_MES / 100) * MEAN_POS_MES - (1 - (PERC_POS_MES / 100))) / MEAN_POS_MES
+        kelly_ano = ((PERC_POS_ANO / 100) * MEAN_POS_ANO - (1 - (PERC_POS_ANO / 100))) / MEAN_POS_ANO
+
+        df = pd.DataFrame({"Total Return(%)": [retorno_norminal],
+                           'CDI+': [val_abova_cdi],
+                           "volatility": [vol_252],
+                           'Pos/Total-Y(%)-roll(nominal)': [PERC_POS_ANO],
+                           'Pos/Total-M(%)-roll(nominal)': [PERC_POS_MES],
+                           'Pos/Total-Y(%)-roll(CDI)': [anos_acima_cdi_perc],
+                           'Pos/Total-M(%)-roll(CDI)': [meses_acima_cdi_perc],
+                           'KellyC_MES': [kelly_mes],
+                           'KellyC_ANO': [kelly_ano],
+                           'Sharpe(Y)': [sharpe_250d],
+                           'MaxDrawDown': [max_drawdow],
+                           'Min_DailyPnL': [min_daily],
+                           'MaxRecovery_Nominal(days)': [max_rec_dd],
+                           'MeanRecovery_Nominal(days)': [mean_rec_dd],
+                           'MaxRecovery_CDI(days)': [max_rec_dd_cdi],
+                           'MeanRecovery_CDI(days)': [mean_rec_dd_cdi],
+                           })
+
+        df_before = df.copy()
+
+        df['Total Return(%)'] = df['Total Return(%)'].map('{:,.0f}%'.format)
+        df['CDI+'] = df['CDI+'].map('{:,.0f}%'.format)
+        # return df
+        df['Pos/Total-Y(%)-roll(nominal)'] = df['Pos/Total-Y(%)-roll(nominal)'].map('{:,.0f}%'.format)
+        df['Pos/Total-M(%)-roll(nominal)'] = df['Pos/Total-M(%)-roll(nominal)'].map('{:,.0f}%'.format)
+        df['Pos/Total-Y(%)-roll(CDI)'] = df['Pos/Total-Y(%)-roll(CDI)'].map('{:,.0f}%'.format)
+        df['Pos/Total-M(%)-roll(CDI)'] = df['Pos/Total-M(%)-roll(CDI)'].map('{:,.0f}%'.format)
+        df['KellyC_MES'] = df['KellyC_MES'].map('{:,.1f}'.format)
+        df['KellyC_ANO'] = df['KellyC_ANO'].map('{:,.1f}'.format)
+        df['Sharpe(Y)'] = df['Sharpe(Y)'].map('{:,.2f}'.format)
+        df['MaxDrawDown'] = df['MaxDrawDown'].map('{:,.1f}%'.format)
+        df['Min_DailyPnL'] = df['Min_DailyPnL'].map('{:,.1f}%'.format)
+
+        df['MeanRecovery_Nominal(days)'] = df['MeanRecovery_Nominal(days)'].map('{:,.0f}'.format)
+        df['MeanRecovery_CDI(days)'] = df['MeanRecovery_CDI(days)'].map('{:,.0f}'.format)
+
+        df['volatility'] = df['volatility'].map('{:,.1f}%'.format)
+
+        df = df.T
+
+        df = df.reset_index()
+        df.columns = ["param", col]
+        lista_res.append(df)
+
+        df2 = df_before.T.reset_index()
+        df2.columns = ["param", col]
+
+        temp2_d = temp2[["date", "drawdown"]].copy()
+        temp2_d.columns = ["date", "MaxDD_{}".format(col)]
+        lista_res_dd.append(temp2_d)
+
+        lista_res2.append(df2)
+
+    for el in range(len(lista_res)):
+        if el == 0:
+            _df = lista_res[el]
+
+        else:
+            _df = pd.merge(_df, lista_res[el], left_on=["param"], right_on=["param"])
+
+    _df.columns = ['_' if el == 'param' else el for el in _df.columns.tolist()]
+
+    print("vamos ver como estaaaaaaaaaaaaaaaaaaaaaa bbbb 111")
+    print(_df)
+
+    for el in range(len(lista_res2)):
+
+        if el == 0:
+            _df2 = lista_res2[el]
+
+        else:
+            _df2 = pd.merge(_df2, lista_res2[el], left_on=["param"], right_on=["param"])
+
+    _df2.columns = ['_' if el == 'param' else el for el in _df2.columns.tolist()]
+
+    #print("vamos ver como estaaaaaaaaaaaaaaaaaaaaaa bbbb")
+    #print(_df2)
+
+    for el in range(len(lista_res_dd)):
+
+        if el == 0:
+            _df_dd = lista_res_dd[el]
+
+        else:
+            print(_df_dd)
+            _df_dd = pd.merge(_df_dd, lista_res_dd[el], left_on=["date"], right_on=["date"])
+
+    cols = _df2.columns.tolist()[1:]
+
+    cols_neg = ['MaxDrawDown', 'Min_DailyPnL', 'MaxRecovery_Nominal(days)', 'MeanRecovery_Nominal(days)',
+                'MaxRecovery_CDI(days)', 'MeanRecovery_CDI(days)', 'volatility']
+
+    print("PRIMEIRO")
+    print(_df)
+
+    print("SEGUNDO")
+    print(_df2)
+
+    print("comecando o improtvemnt ")
+
+    #_df2[cols[0]] = 10000
+
+    _df2["Avg_Improvement"] = _df2.apply(lambda x: np.mean([100 * ((x[cols[el + 1]] - x[cols[0]]) / x[cols[0]]) for el in range(len(cols[1:]))]) if ((x["_"] not in cols_neg)&( abs(x[cols[0]]) > 0)) else (-np.mean([100 * ((x[cols[el + 1]] - x[cols[0]]) / x[cols[0]]) for el in range(len(cols[1:]))]) if abs(x[cols[0]]) > 0 else np.nan)  , axis=1)
+
+    print("SEGUNDO APOS IMPROVE")
+    print(_df2)
+
+    _df = pd.merge(_df, _df2[["_", "Avg_Improvement"]], left_on=["_"], right_on="_", how="inner")
+
+    print("PRIMEIRO APOS MERGE")
+    print(_df2)
+
+    _df['Avg_Improvement'] = _df['Avg_Improvement'].map('{:,.1f}%'.format)
+
+    print("AFTER 1")
+    print(_df)
+
+    print("AFTER 1")
+    print(_df2)
+
+    if not ret_dd:
+
+        return _df
+
+    else:
+
+        return _df_dd
+
+
+class LowVol(bm):
+
+    def __init__(self, country='brazil', start=4350, offset=4350, index='IBX', flag_div_adj=1,
+                 type_trades=['long', 'short'], flag_signal=False, local_database=False, dict_param=False, nbin=7,
+                 backtest_di=True):
+
+        bm.__init__(self)
+
+        self.index = index
+        self.country = country
+        self.start = start
+        self.offset = offset
+        self.flag_control = False
+        self.flag_index = False
+        self.flag_crowd = False
+        self.flag_div_adj = flag_div_adj
+        self.lista_window = [20]
+        self.lista_window_angle = [120]
+        self.lista_window_beta = [500]
+        self.lista_mas = [10, 20, 30]
+        self.lista_return_price = [250, 180, 250]
+        self.lista_window_beta = [500]
+        self.lista_excess_return = [250, 180]
+        # self.window_vol = [20,30,60,90,120,180,250,300,350,400,500]
+        self.window_vol = [100, 120, 180, 240]
+        self.df_params = pd.DataFrame()
+        self.hedge = False
+        self.type_trades = type_trades
+        self.current_vol = 30
+        self.flag_signal = flag_signal
+        self.flag_trade = None
+        self.col_stop = None
+        self.least = None
+        self.TOL = None
+        self.window_enter = 3
+        self.col_rr = None
+        self.tam_rank_in_b = None
+        self.tam_rank_out_b = None
+        self.local_database = local_database
+        self.dict_param = dict_param
+        self.nbin = nbin
+        self.multiplo = None
+        self.backtest_di = backtest_di
+        self.freq = None
+
+    def calc_all_tickers(self, tickers, df_precos):
+
+        lista_df = []
+
+        for ticker in tickers:
+
+            df_desc = df_precos[df_precos["ticker"] == ticker]
+
+            try:
+
+                ss = [(0.3), (0), (0.75), 1.2]
+                print("calculando o ticker: {}".format(ticker))
+                df_desc = compute_all(df_desc,
+                                      spread=False,
+                                      release_memory=False,
+                                      ma=True,
+                                      control_liq=True,
+                                      window_liq=[60],
+                                      col_ma_names=["close"],
+                                      lista_mas=[[5, 10, 7, 21, 30, 45, 20, 40, 180]],
+                                      want_daily_return=True,
+                                      # relative_return_general = True,
+                                      returns_general=False,
+                                      col_return_names=['close'],
+                                      lista_returns=[[60, 90, 120, 180, 240]],
+                                      k_liq=8,
+                                      prop=1,
+                                      betas=False
+                                      # window_betas = [100,180,400]
+                                      )
+
+                lista_df.append(df_desc)
+                # print("computed")
+
+            except:
+                print("Coud not compute features for: {}".format(ticker))
+
+        return pd.concat(lista_df)
+
+    def BuySellConditions(self, df, type_trade='long', col_condition='excess_250'):
+
+        # col = 'return_{}'.format(N*nbin)
+        def help_buy_condition(linha):
+
+            # print(linha["close"])
+            # if (linha["flag_buy"])&(linha["pnl_total_ranking"]>0):
+            # if ((linha["flag_buy"])&(linha["pnl_total_ranking"]!=-1.000000e+12)):
+            if ((linha["flag_buy"])):
+
+                return True
+
+            else:
+
+                return False
+
+        def help_sell_condition(linha):
+            if linha["flagsell"]:
+                # if not linha["flag_buy"]:
+
+                return True
+
+            else:
+                return False
+
+        # NOT IMPLEMENTED
+        def help_buy_condition_short(linha):
+            # print(linha["close"])
+            # if ((linha["flag_buy"])&(linha["pnl_total_ranking"]!=-1.000000e+12)):
+            if ((linha["flag_buy"])):
+
+                return True
+
+
+            else:
+
+                return False
+
+        def help_sell_condition_short(linha):
+
+            # if not linha["flag_buy"]:
+            if linha["flagsell"]:
+
+                return True
+
+            else:
+
+                return False
+
+        # gerando flags de condicoes de compra e venda
+        if type_trade == 'long':
+
+            # df["buy_condition"] = df.apply(help_buy_condition,axis=1)
+            # df["sell_condition"] = df.apply(help_sell_condition,axis=1)
+
+            #             df["buy_condition"] = True
+            #             df["sell_condition"] = False
+
+            df["buy_condition"] = df["flag_buy_long"]
+            df["sell_condition"] = df["flagsell_long"]
+
+            df["buy_d02"] = df["buy_condition"]
+            df["sell_d02"] = df["sell_condition"]
+            df["buy_dn2"] = df["buy_condition"]
+            df["sell_dn2"] = df["sell_condition"]
+
+        else:
+
+            # df["buy_condition"] = df.apply(help_buy_condition_short,axis=1)
+            # df["sell_condition"] = df.apply(help_sell_condition_short,axis=1)
+            # df["buy_condition"] = True
+            # df["sell_condition"] = False
+            self.why = df.copy()
+            df["buy_condition"] = df["flag_buy_short"]
+            df["sell_condition"] = df["flagsell_short"]
+
+            df["buy_d02"] = df["buy_condition"]
+            df["sell_d02"] = df["sell_condition"]
+            df["buy_dn2"] = df["buy_condition"]
+            df["sell_dn2"] = df["sell_condition"]
+
+        return df
+
+    def getBacktestLists(self, df_params, df_params_full, column_ranking, column_ranking2, tam_rank_in, tam_rank_out,
+                         type_trade='long', least=60):
+
+        # df_params = df_params[df_params["flag_liq"]==False]
+
+        self.pp1 = df_params.copy()
+
+        if type_trade == 'long':
+
+            # order = self.list_order[0]
+            order = True
+
+            df_params["rank_1"] = df_params.groupby("date")[self.col_ranking_long].rank(method="max", ascending=order,
+                                                                                        pct=True, na_option="bottom")
+
+        else:
+
+            order = False
+            # order = self.list_order[1]
+            df_params["rank_1"] = df_params.groupby("date")[self.col_ranking_short].rank(method="max", ascending=order,
+                                                                                         pct=True, na_option="bottom")
+
+        df_params["rank_1"] = 100 * df_params["rank_1"]
+        df_params["rank_1"] = round(df_params["rank_1"])
+
+        self.pp = df_params.copy()
+
+        rank_in = df_params[df_params["rank_1"] < (self.tam_rank_in_b + 1)].groupby("date")['ticker'].apply(list).apply(
+            list).tolist()
+        rank_out = df_params[df_params["rank_1"] < (self.tam_rank_out_b + 1)].groupby("date")['ticker'].apply(
+            list).apply(list).tolist()
+
+        # self.rank_out_back = rank_out
+        # self.rank_in_back = rank_in
+
+        ######################################## INICIO NOVA ORDENAÇÃ0 #########################################
+
+        # ignore
+        # result = list(set(sum(rank_in, []) + sum(rank_out, [])))
+
+        result = list(set(reduce(lambda x, y: x + y, rank_in) + reduce(lambda x, y: x + y, rank_out)))
+
+        # lista de tickers
+        tickers_pos = pd.DataFrame({"ticker": result})
+        lista_tickers = tickers_pos.sort_values("ticker")["ticker"].values
+
+        # self.df_params_full2 = df_params_full.copy()
+
+        # serie historica completa com os tickers que ja pertenceram ao rank_in UNION rank_out
+        df_new = pd.merge(df_params_full, tickers_pos, left_on="ticker", right_on="ticker", how="inner")
+        df_new = self.BuySellConditions(df_new, type_trade, col_condition='angle_180')
+
+        df_new = df_new.sort_values("date")
+
+        # self.df_new = df_new.copy()
+
+        # ja foi retirado os nans !
+        lista_lista_buydn_cond = df_new[["buy_dn2", "ticker"]].groupby(['ticker'])['buy_dn2'].apply(list).apply(
+            list).tolist()
+        lista_lista_selldn_cond = df_new[["sell_dn2", "ticker"]].groupby(['ticker'])['sell_dn2'].apply(list).apply(
+            list).tolist()
+        lista_lista_buyd0_cond = df_new[["buy_d02", "ticker"]].groupby(['ticker'])['buy_d02'].apply(list).apply(
+            list).tolist()
+        lista_lista_selld0_cond = df_new[["sell_d02", "ticker"]].groupby(['ticker'])['sell_d02'].apply(list).apply(
+            list).tolist()
+
+        ############ creating new sell conditions ################
+        lista_tickers = lista_tickers.tolist()
+
+        # to be used later on right ordre --------------- IMPORTANT ---------------------
+        df_params_full = df_params_full.sort_values("date")
+        df_new = df_new.sort_values("date")
+
+        datas = df_new[df_new["ticker"] == lista_tickers[0]]["date"].tolist()
+        # print("as datas")
+        # print(datas)
+        return rank_in, rank_out, lista_lista_buydn_cond, lista_lista_selldn_cond, lista_lista_buyd0_cond, lista_lista_selld0_cond, lista_tickers, df_params_full, datas,
+        # return rank_in,rank_out,rank2_in,rank2_out,lista_lista_buydn_cond,lista_lista_selldn_cond,lista_lista_buyd0_cond,lista_lista_selld0_cond,lista_tickers,df_params_full,datas
+
+    def get_data(self):
+
+        rank_in = 15
+        rank_out = 25
+        rebalance_frequence = 20
+        self.limit_buy = [0, 1, 2, 3, 4]
+        self.limit_sell = [0, 1, 2, 3, 4]
+
+        # get rate name for given index/country
+        self.rate_name, self.index_lenght = self.get_rateName()
+
+        # numero de papeis no rank)_in
+        # tam_rank_in = round(self.index_lenght*(rank_in/100))
+        tam_rank_in = round(self.index_lenght * (rank_in / 100))
+        tam_rank_out = round(self.index_lenght * (rank_out / 100))
+
+        print("the rank_in is: {}".format(tam_rank_in))
+        print("the rank_out is: {}".format(tam_rank_out))
+
+        if not self.local_database:
+
+            print("veio no nao local")
+
+            query = '''SELECT date,ticker,close FROM backtesting.rates_global where country ='{}' and prazo ='1y' order by date desc;'''.format(
+                self.country)
+            df_precos = pd.read_sql(query, self.sql_con)
+
+            # filling cdi
+            df_precos = self.fill_carry_inf(df_precos)
+
+            # self.uy = df_precos.copy()
+
+            if not self.backtest_di:
+
+                self.pc_ibx = priceIndex(self.sql_con, (self.start + 1000), (self.offset + 1 + max(janelas) + 100),
+                                         index=self.index)
+                # adding index price columns
+                df_precos = pd.merge(df_precos, self.pc_ibx, left_on=["date"], right_on=["date"], how="inner")
+
+            else:
+
+                df_precos = df_precos[df_precos["close"] != 'LAST_PRICE']
+                precos = df_precos.sort_values("date", ascending=False)[["date", "close"]]
+                _l = precos["close"].iloc[1:].tolist()
+                _l.append(None)
+                precos["close_d-1"] = _l
+                precos = precos.iloc[:-1]
+                precos.columns = ["date", "close_index", "close_d-1_index"]
+                self.pc_ibx = precos.copy()
+                self.pc_ibx["close_index"] = 1
+                self.pc_ibx["close_d-1_index"] = 1
+                df_precos = pd.merge(df_precos, self.pc_ibx, left_on=["date"], right_on=["date"], how="inner")
+
+        else:
+
+            # df_precos = pd.read_excel("ativos_sinteticos.xlsx")
+            # df_precos = pd.read_csv("turnover3.csv").drop("Unnamed: 0",axis=1)
+            # df_precos = pd.read_csv("turnover3_sptsx.csv").drop("Unnamed: 0",axis=1)[["date","ticker","close"]].drop_duplicates()
+            # df_precos = pd.read_csv("sxxe_base.csv").drop("Unnamed: 0",axis=1)[["date","ticker","close"]].drop_duplicates()
+            if self.index == 'IPSA':
+
+                df_precos = pd.read_csv("ipsa_base.csv").drop("Unnamed: 0", axis=1)[
+                    ["date", "ticker", "close"]].drop_duplicates()
+
+            elif self.index == 'IBX':
+
+                df_precos = pd.read_csv("base_simulacao_j.csv").drop("Unnamed: 0", axis=1)
+                # df_precos = pd.read_excel("CUPOM2.xlsx")[["date","ticker","close"]].drop_duplicates()
+                # df_precos["date"] = df_precos["date"].apply(lambda x: x.date())
+
+            elif self.index == 'SPTSX':
+
+                df_precos = pd.read_csv("turnover3_sptsx.csv").drop("Unnamed: 0", axis=1)[
+                    ["date", "ticker", "close"]].drop_duplicates()
+
+            elif self.index == 'AS51':
+
+                df_precos = pd.read_csv("turnover3_as51.csv").drop("Unnamed: 0", axis=1)[
+                    ["date", "ticker", "close"]].drop_duplicates()
+
+            elif self.index == 'MEXBOL':
+
+                df_precos = pd.read_csv("mexbol_databse_2022_04.csv").drop("Unnamed: 0", axis=1)[
+                    ["date", "ticker", "close"]].drop_duplicates()
+
+
+            elif self.index == 'SXXE':
+
+                df_precos = pd.read_csv("sxxe_base.csv").drop("Unnamed: 0", axis=1)[
+                    ["date", "ticker", "close"]].drop_duplicates()
+
+
+            elif self.index == 'TOP40':
+                # ("top40_base.csv")
+                df_precos = pd.read_csv("top40_base.csv").drop("Unnamed: 0", axis=1)[
+                    ["date", "ticker", "close"]].drop_duplicates()
+
+            else:
+
+                print("pais não encontrado ")
+
+            df_precos = df_precos[df_precos["close"] != 'LAST_PRICE']
+            df_precos["date"] = df_precos["date"].apply(lambda x: datetime.strptime(x, "%Y-%m-%d").date())
+            # df_precos["date_next"] = df_precos["date_next"].apply(lambda x: datetime.strptime(x,"%Y-%m-%d").date())
+            df_precos = df_precos[df_precos["date"] >= datetime(2001, 12, 1).date()]
+            df_precos["close"] = df_precos["close"].apply(lambda x: float(x))
+            df_precos = df_precos.sort_values("date", ascending=False)
+
+            # ADDING INDEX
+            _df_precos = df_precos[df_precos["ticker"] == '{} Index'.format(self.index)]
+            precos = _df_precos.sort_values("date", ascending=False)[["date", "close"]]
+            _l = precos["close"].iloc[1:].tolist()
+            _l.append(None)
+            precos["close_d-1"] = _l
+            precos = precos.iloc[:-1]
+            precos.columns = ["date", "close_index", "close_d-1_index"]
+            self.pc_ibx = precos.copy()
+
+            # filling cdi
+            df_precos = self.fill_carry_inf(df_precos)
+
+            # adding index price columns
+            df_precos = pd.merge(df_precos, self.pc_ibx, left_on=["date"], right_on=["date"], how="inner")
+
+        # computing features
+
+        ################################################## ADDDING VOLS COLUMN ###########################################
+        df_desc = compute_all(df_precos[df_precos["ticker"] == '{} Index'.format(self.index)],
+                              vol=True,
+                              window_vol=[250],
+                              entropy_features=False,
+                              release_memory=False,
+                              control_liq=False,
+                              want_daily_return=True)
+
+        vols_ibx = df_desc[["date", "vol_250"]].sort_values("date", ascending=False)
+        vols_ibx.columns = ["date", "vol_250_index"]
+        df_precos = pd.merge(df_precos, vols_ibx, left_on="date", right_on=["date"], how="left")
+        df_precos["vol_250_index"] = df_precos["vol_250_index"].fillna(method="ffill")
+        df_precos["vol_250_index"] = df_precos["vol_250_index"].fillna(method="bfill")
+        ################################################## ADDDING VOLS COLUMN ###########################################
+
+        self.ooo = df_precos.copy()
+
+        # df_precos["vol_250_index"] = df_precos["vol_250_index"] /np.sqrt(252)
+        # df_precos["daily_return"] = df_precos["daily_return"] /np.sqrt(252)
+
+        tickers = df_precos["ticker"].unique().tolist()
+        # tickers = tickers[0:10]
+        df_params_full = self.calc_all_tickers(tickers, df_precos)
+
+        if not 'year' in df_params_full.columns.tolist():
+            df_params_full["year"] = df_params_full["date"].apply(lambda x: x.year)
+
+        #self.df_indice = self.get_indexCompos(index=self.index)
+
+        if self.index != 'IBX':
+
+            if not self.backtest_di:
+
+                df_params = pd.merge(df_params_full, self.df_indice, left_on=["year", "ticker"],
+                                     right_on=["year", "ticker"], how="inner")
+
+            else:
+
+                df_params = pd.merge(df_params_full, self.df_indice, left_on=["year", "ticker"],
+                                     right_on=["year", "ticker"], how="inner")
+
+        else:
+
+            # pass
+
+            # if ibx, existe a base granular
+            # df_params = self.fix_composition(df_params_full,n_min =-1)
+            df_params = df_params_full.copy()
+            # df_params = self.fix_composition(df_params_full)
+
+        print("finished calculading features")
+
+        return df_params, df_params_full, tam_rank_in, tam_rank_out
+
+    def gen_report_beta(self, df_final, df_params_full, type_trade='long', notional=100000, borrow_cost=3,
+                        postive_borrow_factor=0, flag_hedge=True, multi_tx=1, beta_adjust=False, beta_number=400,
+                        normalize=False):
+
+        # print("porra do relatorio 2")
+        if type_trade == 'long':
+
+            module_signal = 1
+
+        else:
+
+            module_signal = -1
+
+        df_entradas = df_final[df_final["signal"] == module_signal * 1]
+        df_vendas = df_final[df_final["signal"] == module_signal * -1]
+        df_resto = df_final[df_final["signal"] != module_signal * 1]
+
+        if flag_hedge:
+
+            multi_hedge = 1
+
+        else:
+
+            multi_hedge = 0
+
+        daily_cost = ((1 + (borrow_cost / 100)) ** (1 / 252)) - 1
+
+        if not beta_adjust:
+
+            df_entradas = pd.merge(df_entradas, df_params_full[["date", "ticker", "close", "close_index"]],
+                                   left_on=["date", "ticker"], right_on=["date", "ticker"], how="inner")
+            df_entradas.columns = ["signal", "date", "ticker", "px_entry", "px_entry_hedge"]
+            df_entradas["qtty"] = round(notional / (module_signal * df_entradas["px_entry"]))
+            # df_entradas["qtty"] = notional/(module_signal*df_entradas["px_entry"])
+
+
+        else:
+
+            # BETA NEUTRAL
+            if not normalize:
+
+                df_entradas = pd.merge(df_entradas, df_params_full[
+                    ["date", "ticker", "close", "close_index", "beta_{}".format(beta_number), "flag_liq"]],
+                                       left_on=["date", "ticker"], right_on=["date", "ticker"], how="inner")
+
+            else:
+
+                df_entradas = pd.merge(df_entradas, df_params_full[
+                    ["date", "ticker", "close", "close_index", "beta_norm", "flag_liq"]], left_on=["date", "ticker"],
+                                       right_on=["date", "ticker"], how="inner")
+
+            df_entradas.columns = ["signal", "date", "ticker", "px_entry", "px_entry_hedge", "beta_entry", "flag_liq"]
+            self.df_entradas = df_entradas.copy()
+
+            def help_notional(linha):
+
+                if linha["flag_liq"] == True:
+
+                    return 100000
+
+                else:
+
+                    return 100000 / (linha["beta_entry"])
+
+            df_entradas["notional"] = df_entradas.apply(help_notional, axis=1)
+
+            # df_entradas["notional"] = 100000*((1)/(0.2/df_entradas["vol_mean"]))
+            # df_entradas["qtty"] = round(df_entradas["notional"]/(module_signal*df_entradas["px_entry"]))
+            df_entradas["qtty"] = df_entradas["notional"] / (module_signal * df_entradas["px_entry"])
+
+        if flag_hedge:
+
+            if not beta_adjust:
+
+                df_entradas["qtty_hedge"] = round(notional / (-module_signal * df_entradas["px_entry_hedge"]))
+
+            else:
+
+                df_entradas["qtty_hedge"] = round(
+                    df_entradas["notional"] / (-module_signal * df_entradas["px_entry_hedge"]))
+                # df_entradas["qtty"] = round(df_entradas["notional"]/(module_signal*df_entradas["px_entry"]))#
+        else:
+
+            df_entradas["qtty_hedge"] = 0
+            df_entradas["qtty_hedge"] = None
+
+        df_all = pd.concat([df_entradas, df_resto]).sort_values(["ticker", "date"], ascending=[True, True])
+        df_all = df_all.replace((np.nan, ''), (None, None))
+
+        df_all["px_entry"] = df_all["px_entry"].fillna(method='ffill')
+        df_all["qtty"] = df_all["qtty"].fillna(method='ffill')
+
+        if flag_hedge:
+            df_all["px_entry_hedge"] = df_all["px_entry_hedge"].fillna(method='ffill')
+            df_all["qtty_hedge"] = df_all["qtty_hedge"].fillna(method='ffill')
+
+        else:
+            df_all["px_entry_hedge"] = 0
+            df_all["qtty_hedge"] = 0
+
+        df_all2 = pd.merge(df_all, df_params_full[
+            ["date", "ticker", "close", "close_d-1", "close_index", "close_d-1_index", "carry"]],
+                           left_on=["date", "ticker"], right_on=["date", "ticker"], how="inner")
+
+        entradas_saidas = df_all2[~pd.isnull(df_all2["signal"])]
+        positions = df_all2[pd.isnull(df_all2["signal"])]
+
+        entradas_saidas["txBrokerEqt"] = (-1) * abs(
+            entradas_saidas["close"] * abs(entradas_saidas["qtty"]) * 0.001 * multi_tx)
+
+        if flag_hedge:
+
+            entradas_saidas["txBrokerHedge"] = (-1) * abs(
+                entradas_saidas["close_index"] * abs(entradas_saidas["qtty_hedge"]) * 0.0005 * multi_tx)
+
+        else:
+
+            entradas_saidas["txBrokerHedge"] = 0
+
+        positions["txBrokerEqt"] = 0
+        positions["txBrokerHedge"] = 0
+        positions["txBroker"] = 0
+        entradas_saidas["txBroker"] = entradas_saidas["txBrokerEqt"] + entradas_saidas["txBrokerHedge"]
+        entradas_saidas["pnl_daily_nominal_Hedge"] = 0
+        entradas_saidas["pnl_daily_nominal_EQT"] = 0
+        entradas_saidas["carry_eqt"] = 0
+        entradas_saidas["carry_hedge"] = 0
+        entradas_saidas["borrow_cost_hedge"] = 0
+        # borrow cost eqt
+        if type_trade == 'long':
+
+            entradas_saidas["borrow_cost"] = 0
+
+        else:
+
+            entradas_saidas_p1 = entradas_saidas[entradas_saidas["signal"] == module_signal]
+            entradas_saidas_p2 = entradas_saidas[entradas_saidas["signal"] == -module_signal]
+
+            entradas_saidas_p1["borrow_cost"] = 1 * module_signal * 1 * abs(
+                entradas_saidas_p1["qtty"] * entradas_saidas_p1["px_entry"] * daily_cost)
+            entradas_saidas_p2["borrow_cost"] = 0
+            entradas_saidas = pd.concat([entradas_saidas_p1, entradas_saidas_p2])
+
+        # start = time.time()
+        positions["pnl_daily_nominal_EQT"] = (positions["close"] - positions["close_d-1"]) * positions["qtty"]
+        positions["pnl_daily_nominal_Hedge"] = (positions["close_index"] - positions["close_d-1_index"]) * positions[
+            "qtty_hedge"]
+        positions["carry_hedge"] = (-1) * positions["close_index"] * positions["qtty_hedge"] * positions["carry"]
+        positions["carry_eqt"] = (-1) * positions["close"] * positions["qtty"] * positions["carry"]
+
+        # hedge borrow
+        if flag_hedge:
+
+            if type_trade == 'long':
+
+                positions["borrow_cost_hedge"] = -1 * module_signal * abs(
+                    positions["qtty_hedge"] * positions["px_entry_hedge"] * daily_cost)
+
+            else:
+
+                positions["borrow_cost_hedge"] = 0
+
+        else:
+            positions["borrow_cost_hedge"] = 0
+
+        if type_trade == 'long':
+
+            positions["borrow_cost"] = 1 * module_signal * postive_borrow_factor * abs(
+                positions["qtty"] * positions["px_entry"] * daily_cost)
+
+        else:
+
+            positions["borrow_cost"] = 1 * module_signal * 1 * abs(
+                positions["qtty"] * positions["px_entry"] * daily_cost)
+
+        df_all = pd.concat([entradas_saidas, positions]).sort_values(["ticker", "date"], ascending=[True, True])
+
+        df_all["pnl_cdi_eqt"] = df_all["pnl_daily_nominal_EQT"] + df_all["carry_eqt"] + df_all["borrow_cost"]
+        df_all["pnl_cdi_hedge"] = df_all["pnl_daily_nominal_Hedge"] + df_all["carry_hedge"] + df_all[
+            "borrow_cost_hedge"]
+        df_all["pnl_total"] = df_all["pnl_cdi_hedge"] + df_all["pnl_cdi_eqt"] + df_all["txBroker"]
+
+        daily_rep = df_all.groupby(["date"]).agg({"pnl_daily_nominal_EQT": "sum", "pnl_daily_nominal_Hedge": "sum",
+                                                  "txBroker": "sum", "borrow_cost": "sum", "borrow_cost_hedge": "sum",
+                                                  "carry_eqt": "sum", "carry_hedge": "sum",
+                                                  "pnl_total": "sum"}).reset_index()
+
+        daily_rep["year"] = daily_rep["date"].apply(lambda x: x.year)
+        anual_rep = daily_rep.groupby("year").agg({"pnl_daily_nominal_EQT": "sum",
+                                                   "pnl_daily_nominal_Hedge": "sum",
+                                                   "txBroker": "sum",
+                                                   "borrow_cost": "sum",
+                                                   "borrow_cost_hedge": "sum",
+                                                   "carry_eqt": "sum",
+                                                   "carry_hedge": "sum",
+                                                   "pnl_total": "sum"}).reset_index()
+
+        df_all["year"] = df_all["date"].apply(lambda x: x.year)
+        trades = df_all[(df_all["signal"] == (-module_signal * 1))]
+        trades2 = trades.groupby("year").agg({"ticker": "count"}).reset_index()
+        trades2.rename(columns={'ticker': 'n_trades'}, inplace=True)
+
+        anual_rep = pd.merge(anual_rep, trades2, left_on="year", right_on="year", how="left")
+        anual_rep["pnl/trade"] = anual_rep["pnl_total"] / anual_rep['n_trades']
+        anual_rep["pnl/trade(%)"] = 100 * (anual_rep["pnl/trade"] / 100000)
+
+        return df_all, daily_rep, anual_rep
+
+    # type 1, with control variable and rebalance(dias corridos).
+    # No external control variables
+    def generate_signal_fast_J(self, type_trade, rank_in, rank_out, lista_lista_buydn_cond, lista_lista_selldn_cond,
+                               lista_lista_buyd0_cond, lista_lista_selld0_cond, lista_tickers, df_params_full, datas,
+                               rebalance_frequence=20):
+
+        print("comeceeeeeeeeeee jjjj")
+        lista_df = []
+
+        if type_trade == 'long':
+
+            module_signal = 1
+
+        else:
+            module_signal = -1
+
+        count_days = 0
+        data_max = max(datas)
+
+        for el in range(len(lista_tickers)):
+
+            flag_init = True
+            lista_signal = []
+            datas_ticker = []
+            pos = False
+            ticker = lista_tickers[el]
+
+            count_days = 0
+
+            # itera nas datas
+            for el2 in range(len(lista_lista_buyd0_cond[el])):
+
+                if not flag_init:
+
+                    # nao tem posicoa, verifica se compra indepenen do sinal de rebalance
+                    if not pos:
+
+                        count_days += 1
+
+                        if (((count_days - 1) % rebalance_frequence) == 0):
+
+                            if (ticker in rank_in[el2]) & (not pos) & lista_lista_buydn_cond[el][el2] & (
+                            not (lista_lista_selldn_cond[el][el2])):
+
+                                if datas[el2] != data_max:
+
+                                    pos = True
+                                    # count_days += 1
+                                    lista_signal.append(1 * module_signal)
+                                    datas_ticker.append(datas[el2])
+
+                                else:
+
+                                    pass
+
+                            else:
+
+                                pass
+
+                        else:
+
+                            if (pos):
+
+                                lista_signal.append(None)
+                                datas_ticker.append(datas[el2])
+
+                            else:
+
+                                lista_signal.append(2)
+                                datas_ticker.append(datas[el2])
+
+                    else:
+
+                        # tem posicao, incrementa a contagem
+                        count_days += 1
+                        # if rebalnace
+                        if (((count_days - 1) % rebalance_frequence) == 0):
+
+                            if ((lista_lista_selldn_cond[el][el2])) & (pos):
+
+                                pos = False
+
+                                lista_signal.append(-1 * module_signal)
+                                lista_signal.append(None)
+                                datas_ticker.append(datas[el2])
+                                datas_ticker.append(datas[el2])
+
+
+                            # esta no rank_in e ja tem posicao: hold
+                            elif (ticker in rank_in[el2]) & (pos):
+
+                                datas_ticker.append(datas[el2])
+                                lista_signal.append(None)
+
+
+                            # ja tem posicao e esta no rank_out: hold
+                            elif (ticker in rank_out[el2]) & (pos):
+
+                                lista_signal.append(None)
+                                datas_ticker.append(datas[el2])
+
+                            else:
+
+                                pass
+
+
+                        # if not rebalance, hold
+                        else:
+                            if (pos):
+                                lista_signal.append(None)
+                                datas_ticker.append(datas[el2])
+
+                            else:
+
+                                pass
+
+
+                else:
+
+                    flag_init = False
+
+                    count_days += 1
+                    if (((count_days - 1) % rebalance_frequence) == 0):
+
+                        # nao tem posicao e esta no rank_in: compra
+                        if (ticker in rank_in[el2]) & (not pos) & lista_lista_buyd0_cond[el][el2] & (
+                        not (lista_lista_selld0_cond[el][el2])):
+
+                            # count_days += 1
+                            pos = True
+                            lista_signal.append(1 * module_signal)
+                            datas_ticker.append(datas[el2])
+
+                        else:
+
+                            pass
+
+                    else:
+
+                        if (pos):
+
+                            lista_signal.append(None)
+                            datas_ticker.append(datas[el2])
+
+                        else:
+
+                            pass
+
+            if pos == True:
+                lista_signal.append(-1 * module_signal)
+                datas_ticker.append(datas[el2])
+
+            df = pd.DataFrame({"signal": lista_signal, "date": datas_ticker})
+            df["ticker"] = ticker
+            lista_df.append(df)
+            df_final = pd.concat(lista_df)
+
+        return lista_df, df_final
+
+    def backtest_run(self, df_params, df_params_full, tam_rank_in, tam_rank_out):
+
+        lista_daily = []
+        lista_anual = []
+        lista_dailyTicker = []
+
+        # print("wtf is going on")
+
+        # print("generating lists")
+        for type_trade in self.type_trades:
+            tam_rank_in = self.tam_rank_in_b
+            tam_rank_out = self.tam_rank_out_b
+
+            # print("rout : {}".format(tam_rank_out))
+            rank_in, rank_out, lista_lista_buydn_cond, lista_lista_selldn_cond, lista_lista_buyd0_cond, lista_lista_selld0_cond, lista_tickers, df_params_full, datas = self.getBacktestLists(
+                df_params, df_params_full, self.col_rr, self.col_rr, tam_rank_in, tam_rank_out, type_trade=type_trade,
+                least=self.least)
+
+            self.rank_in_b = rank_in
+            self.rank_in = rank_in
+            self.rank_out = rank_out
+            self.lista_lista_buydn_cond = lista_lista_buydn_cond
+            self.lista_lista_selldn_cond = lista_lista_selldn_cond
+            self.lista_lista_buyd0_cond = lista_lista_buyd0_cond
+            self.lista_lista_selld0_cond = lista_lista_selld0_cond
+            self.lista_tickers = lista_tickers
+            self.df_params_full = df_params_full.copy()
+            self.datas = datas
+
+            # print("o tamanho do rank in: {}, o tamanho das datas: {}, conds: {}, tickers: {}".format(len(rank_in),len(datas),len(lista_lista_buydn_cond[0]),len(lista_tickers)))
+
+            lista_df, df_final = self.generate_signal_fast(type_trade, rank_in, rank_out, lista_lista_buydn_cond,
+                                                           lista_lista_selldn_cond, lista_lista_buyd0_cond,
+                                                           lista_lista_selld0_cond, lista_tickers, df_params_full,
+                                                           datas, rebalance_frequence=self.reb)
+
+            # print("generating report")
+            self.hedge = self.type_hedge
+
+            df_final = df_final[df_final["signal"] != 2]
+
+            self.df_final = df_final.copy()
+
+            # def gen_report_beta(self,df_final,df_params_full,type_trade = 'long',notional =100000,borrow_cost = 3,postive_borrow_factor = 0,flag_hedge = True,multi_tx=1,beta_adjust=False,beta_number = 400):
+            # rep,daily_rep,anual_rep = self.gen_report_fast2(df_final,df_params_full,type_trade = type_trade,notional = 100000,borrow_cost = 0,postive_borrow_factor = 0,flag_hedge = self.hedge,multi_tx = 1,vol_adjust =False)
+            rep, daily_rep, anual_rep = self.gen_report_fast2(df_final, df_params_full, type_trade=type_trade,
+                                                              notional=self.notional_pos, borrow_cost=0,
+                                                              postive_borrow_factor=0, flag_hedge=self.hedge,
+                                                              multi_tx=1, vol_adjust=False)
+            # rep,daily_rep,anual_rep = self.gen_report_beta(df_final,df_params_full,type_trade = type_trade,notional = 100000,borrow_cost = 3,postive_borrow_factor = 0,flag_hedge = self.hedge,multi_tx = 1,beta_adjust = True, beta_number = self.beta_number,normalize = True)
+            lista_dailyTicker.append(rep)
+            lista_anual.append(anual_rep)
+
+            return rep, daily_rep, anual_rep
+
+        long_short_daily, long_short_anual = self.joinLongShort(self.type_trades, lista_dailyTicker, lista_daily,
+                                                                lista_anual)
+        return long_short_daily, long_short_anual
+
+    def process_weight(self, pesos_rv2, min_w_allowed=0.0005):
+
+        pesos_rv2 = [1 if el >= 1 else el for el in pesos_rv2]
+
+        pesos_rv = pesos_rv2
+        ss = sum(pesos_rv)
+
+        if abs(ss - 1) < min_w_allowed:
+
+            pass
+
+        else:
+
+            pass
+
+            dif = 1 - ss
+
+            # TUDO CERTO !
+            if dif > 0:
+
+                inc = dif / len([el for el in pesos_rv if abs(el) > 0])
+                pesos_rv = [el + inc if abs(el) > 0 else el for el in pesos_rv]
+
+            else:
+
+                inc = dif / len([el for el in pesos_rv if abs(el) > 0])
+
+                maior_que_inc = [el for el in pesos_rv if el > abs(inc)]
+
+                # TUDO CERTO
+                if len(maior_que_inc) == len([el for el in pesos_rv if abs(el) > 0]):
+
+                    pesos_rv = [el + inc if abs(el) > 0 else el for el in pesos_rv]
+
+                # PRECISA ITERAR
+                else:
+
+                    for i in range(100):
+
+                        if abs(1 - ss) < 0.001:
+
+                            break
+
+                        else:
+
+                            dif = 1 - ss
+                            if dif > 0:
+
+                                pesos_rv = [el + inc if abs(el) > 0 else el for el in pesos_rv]
+
+                                break
+
+                            else:
+
+                                inc = dif / len([el for el in pesos_rv if abs(el) > 0])
+                                maior_que_inc = [el for el in pesos_rv if el > abs(inc)]
+
+                                if len(maior_que_inc) == len(pesos_rv):
+                                    pesos_rv = [el + inc if abs(el) > 0 else el for el in pesos_rv]
+
+                                    break
+
+                                else:
+                                    # atualizou
+                                    pesos_rv = [el + inc if el in maior_que_inc else el for el in pesos_rv]
+                                    ss = sum(pesos_rv)
+
+        mins = [el for el in pesos_rv if el < min_w_allowed]
+        inc = sum(mins) / len([el for el in pesos_rv if el not in mins])
+        pesos_rv = [el + inc if el not in mins else 0 for el in pesos_rv]
+        return pesos_rv
+
+    def grafico_iteracoes_fundo(self, df_params_full_pure, dt_min=datetime(2016, 1, 5).date(),
+                                dt_max=datetime(2022, 9, 11).date(),
+                                lista_pesos_fundo=[0, 0.05, 0.075],
+                                notional_inicial=100000000, if_return_df=False, ativo_variavel='Fund', title='teste',
+                                x_title='x teste', y_title='y teste', imab5p_w=0.3, imab5_w=0.2, dipre_w=0.15,
+                                cdi_w=0.05, rv_w=0.3, ibx_w=0.7, small11_w=0.1, divo11_w=0.1, sp500_w=0.1, fund_w=0):
+
+        dt_min = datetime(int(dt_min.split("-")[0]), int(dt_min.split("-")[1]), int(dt_min.split("-")[2])).date()
+        dt_max = datetime(int(dt_max.split("-")[0]), int(dt_max.split("-")[1]), int(dt_max.split("-")[2])).date()
+        print("o dt maxxxxxxxxxxxxxx")
+        print(dt_max)
+        lista_comp = []
+        for peso_variado in lista_pesos_fundo:
+
+            # CADATRO DE TICKES
+            nucleo_rv = ['IBX Index', 'SMAL11 BS Equity', 'SPX_REAL', 'DIVO11 BS Equity']
+            nucleo_imab5_p = ['IMAB_5P']
+            nucleo_imab5 = ['IMAB_5']
+            nucleo_di = ['GTBRL3Y Govt']
+            nucleo_cdi = ['CDI']
+            nucleo_turing = ['TURING_MASTER']
+
+            rest = 0.8
+            ################################################### CONFIG ##########################################################
+            notional_total = notional_inicial
+            notional_total_inicial = notional_total
+
+            if ativo_variavel == 'Fund':
+
+                weight_rv = rv_w
+                weight_imab5_p = imab5p_w
+                weight_imab5 = imab5_w
+                weight_di_pre = dipre_w
+                weight_cdi = cdi_w
+                weight_turing = peso_variado
+                pesos_rv = [ibx_w, small11_w, sp500_w, divo11_w]
+                pesos_rv = self.process_weight(pesos_rv)
+                pesos_upper = [weight_rv, weight_imab5_p, weight_imab5, weight_di_pre, weight_cdi, weight_turing]
+
+
+            elif ativo_variavel == 'IMAB5':
+
+                weight_rv = rv_w
+                weight_imab5_p = imab5p_w
+                weight_imab5 = peso_variado
+                weight_di_pre = dipre_w
+                weight_cdi = cdi_w
+                weight_turing = fund_w
+                pesos_rv = [ibx_w, small11_w, sp500_w, divo11_w]
+                pesos_rv = self.process_weight(pesos_rv)
+                pesos_upper = [weight_rv, weight_imab5_p, weight_imab5, weight_di_pre, weight_cdi, weight_turing]
+
+
+            elif ativo_variavel == 'IMAB5_P':
+
+                weight_rv = rv_w
+                weight_imab5_p = peso_variado
+                weight_imab5 = imab5_w
+                weight_di_pre = dipre_w
+                weight_cdi = cdi_w
+                weight_turing = fund_w
+                pesos_rv = [ibx_w, small11_w, sp500_w, divo11_w]
+                pesos_rv = self.process_weight(pesos_rv)
+                pesos_upper = [weight_rv, weight_imab5_p, weight_imab5, weight_di_pre, weight_cdi, weight_turing]
+
+
+            elif ativo_variavel == 'DI_PRE_3Y':
+
+                weight_rv = rv_w
+                weight_imab5_p = imab5p_w
+                weight_imab5 = imab5_w
+                weight_di_pre = peso_variado
+                weight_cdi = cdi_w
+                weight_turing = fund_w
+                pesos_rv = [ibx_w, small11_w, sp500_w, divo11_w]
+                pesos_rv = self.process_weight(pesos_rv)
+                pesos_upper = [weight_rv, weight_imab5_p, weight_imab5, weight_di_pre, weight_cdi, weight_turing]
+
+
+            elif ativo_variavel == 'CDI':
+
+                weight_rv = rv_w
+                weight_imab5_p = imab5p_w
+                weight_imab5 = imab5_w
+                weight_di_pre = dipre_w
+                weight_cdi = peso_variado
+                weight_turing = fund_w
+                pesos_rv = [ibx_w, small11_w, sp500_w, divo11_w]
+                pesos_rv = self.process_weight(pesos_rv)
+                pesos_upper = [weight_rv, weight_imab5_p, weight_imab5, weight_di_pre, weight_cdi, weight_turing]
+
+
+            elif ativo_variavel == 'RV':
+
+                weight_rv = peso_variado
+                weight_imab5_p = imab5p_w
+                weight_imab5 = imab5_w
+                weight_di_pre = dipre_w
+                weight_cdi = cdi_w
+                weight_turing = fund_w
+                pesos_rv = [ibx_w, small11_w, sp500_w, divo11_w]
+                pesos_rv = self.process_weight(pesos_rv)
+                pesos_upper = [weight_rv, weight_imab5_p, weight_imab5, weight_di_pre, weight_cdi, weight_turing]
+
+
+            elif ativo_variavel == 'IBOV':
+
+                weight_rv = rv_w
+                weight_imab5_p = imab5p_w
+                weight_imab5 = imab5_w
+                weight_di_pre = dipre_w
+                weight_cdi = cdi_w
+                weight_turing = fund_w
+                pesos_rv = [peso_variado, small11_w, sp500_w, divo11_w]
+                pesos_rv = self.process_weight(pesos_rv)
+                pesos_upper = [weight_rv, weight_imab5_p, weight_imab5, weight_di_pre, weight_cdi, weight_turing]
+
+
+            elif ativo_variavel == 'S&P':
+
+                weight_rv = rv_w
+                weight_imab5_p = imab5p_w
+                weight_imab5 = imab5_w
+                weight_di_pre = dipre_w
+                weight_cdi = cdi_w
+                weight_turing = fund_w
+                pesos_rv = [ibx_w, small11_w, peso_variado, divo11_w]
+                pesos_rv = self.process_weight(pesos_rv)
+                pesos_upper = [weight_rv, weight_imab5_p, weight_imab5, weight_di_pre, weight_cdi, weight_turing]
+
+
+
+            elif ativo_variavel == 'SMALL11':
+
+                weight_rv = rv_w
+                weight_imab5_p = imab5p_w
+                weight_imab5 = imab5_w
+                weight_di_pre = dipre_w
+                weight_cdi = cdi_w
+                weight_turing = fund_w
+                pesos_rv = [ibx_w, peso_variado, sp500_w, divo11_w]
+                pesos_rv = self.process_weight(pesos_rv)
+                pesos_upper = [weight_rv, weight_imab5_p, weight_imab5, weight_di_pre, weight_cdi, weight_turing]
+
+
+            elif ativo_variavel == 'DIVO11':
+
+                weight_rv = rv_w
+                weight_imab5_p = imab5p_w
+                weight_imab5 = imab5_w
+                weight_di_pre = dipre_w
+                weight_cdi = cdi_w
+                weight_turing = fund_w
+                pesos_rv = [ibx_w, small11_w, sp500_w, peso_variado]
+                pesos_rv = self.process_weight(pesos_rv)
+                pesos_upper = [weight_rv, weight_imab5_p, weight_imab5, weight_di_pre, weight_cdi, weight_turing]
+
+
+            else:
+
+                pass
+
+            # todos_tickers = [nucleo_rv, nucleo_imab5_p, nucleo_imab5, nucleo_di, nucleo_cdi]
+            todos_tickers = [nucleo_rv, nucleo_imab5_p, nucleo_imab5, nucleo_di, nucleo_cdi, nucleo_turing]
+
+            # PARCIAL
+            todos_pesos2 = [weight_rv] + [weight_imab5_p] + [weight_imab5] + [weight_di_pre] + [weight_cdi] + [
+                weight_turing]
+            todos_pesos2 = self.process_weight(todos_pesos2)
+
+            weight_rv_P = todos_pesos2[0]
+            todos_pesos2 = todos_pesos2[1:]
+
+            pesos_rv = [el * weight_rv_P for el in pesos_rv]
+            todos_pesos = pesos_rv + todos_pesos2
+
+            todos_tickers = list(chain(*todos_tickers))
+
+            if abs(1 - sum(todos_pesos)) > 0.1:
+                print("erro pesos portfolio")
+                # pass
+
+
+            else:
+                print("portfolio: Ok")
+                # pass
+
+            todos_pesos_raw = todos_pesos
+            todos_pesos = [el * notional_total for el in todos_pesos]
+
+            ################################################### CONFIG ##########################################################
+            self.col_rr = 'close'
+            self.col_ranking_long = 'close'
+            self.col_ranking_short = 'close'
+            self.tam_rank_in_b = 250
+            self.tam_rank_out_b = 250
+            self.reb = 1
+            self.type_hedge = False
+
+            df_params_full_pure["carry"] = 0
+            df_params_full_pure["taxa"] = 0
+
+            # tickers = ['GD12 Curncy','GD6 Curncy']
+            # tickers = ['GD12 Curncy']
+            # dt_min = datetime(2014,1,5).date()
+            df_params_full_pure_trade2 = df_params_full_pure[
+                (df_params_full_pure["date"] >= dt_min) & (df_params_full_pure["date"] <= dt_max)]
+
+            ############################# CONDICOES DE ZERADA
+            dts = df_params_full_pure_trade2[df_params_full_pure_trade2["date"] >= dt_min][["date"]].drop_duplicates()
+
+            tipo = 'anual'
+
+            dts["year"] = dts["date"].apply(lambda x: x.year)
+            dts["month"] = dts["date"].apply(lambda x: x.month)
+            dts["day"] = dts["date"].apply(lambda x: x.day)
+
+            if tipo == 'anual':
+
+                zeradas = dts.groupby("year").agg({"date": "min"}).reset_index().sort_values("date")[["date"]]
+
+
+            elif tipo == 'semestral':
+
+                zeradas = dts[(dts["month"] == 12) | (dts["month"] == 6)].groupby(["year", "month"]).agg(
+                    {"date": "min"}).reset_index().sort_values("date")[["date"]]
+
+            zeradas = zeradas["date"].tolist()
+            min_date = min(zeradas)
+            max_date = max(zeradas)
+
+            ############################# CONDICOES DE ZERADA
+            lista_media_curta = [7]
+            lista_media_longa = [21]
+
+            lista_res = []
+            lista_res_anuais = []
+            prazo = 12
+            lista_daily_long = []
+
+            # for ticker in todos_tickers[0:]:
+            for j in range(len(zeradas)):
+
+                # UPDATE
+                if j == 0:
+
+                    pass
+
+                else:
+
+                    if abs(pl_fundo) > 0:
+
+                        # print("o PL atual é::::::::: {}".format(pl_fundo))
+                        notional_total = pl_fundo
+                        todos_pesos = [round(el * notional_total) for el in todos_pesos_raw]
+                        # todos_pesos2
+
+                    else:
+                        pass
+
+                if len(zeradas) > 1:
+
+                    data_zera_next = zeradas[j]
+
+                    if data_zera_next == min_date:
+
+                        df_params_full_pure_trade3 = df_params_full_pure_trade2[
+                            (df_params_full_pure_trade2["date"] <= data_zera_next)]
+
+
+                    elif data_zera_next == max_date:
+
+                        # print("max dateeeeeeeeeeeeeeeeeeeeeeeee")
+                        data_zera_prev = zeradas[j - 1]
+                        df_params_full_pure_trade3 = df_params_full_pure_trade2[
+                            (df_params_full_pure_trade2["date"] >= data_zera_prev)]
+
+                    else:
+
+                        data_zera_prev = zeradas[j - 1]
+                        df_params_full_pure_trade3 = df_params_full_pure_trade2[
+                            (df_params_full_pure_trade2["date"] > data_zera_prev) & (
+                                        df_params_full_pure_trade2["date"] <= data_zera_next)]
+
+
+                else:
+
+                    df_params_full_pure_trade3 = df_params_full_pure_trade2.copy()
+
+                i = 0
+                sub_lista = []
+                for ticker in todos_tickers[0:]:
+
+                    if todos_pesos_raw[i] != 0:
+
+                        df_params_full_pure_trade = df_params_full_pure_trade3[
+                            (df_params_full_pure_trade3["ticker"] == ticker)]
+
+                        if ticker == 'CDI':
+
+                            df_params_full_pure_trade = df_params_full_pure_trade.sort_values("date")
+
+                            df_params_full_pure_trade["carry_t"] = (1 + (df_params_full_pure_trade["close"] / 100)) ** (
+                                        1 / 252)
+                            df_params_full_pure_trade["cumprod"] = df_params_full_pure_trade["carry_t"].cumprod()
+                            df_params_full_pure_trade["cumprod"] = df_params_full_pure_trade["cumprod"] / \
+                                                                   df_params_full_pure_trade["cumprod"].iloc[0]
+                            df_params_full_pure_trade["close"] = df_params_full_pure_trade["cumprod"]
+
+                            df_cd = df_params_full_pure_trade.copy()
+
+                            menos = [None] + df_params_full_pure_trade["close"].tolist()[0:-1]
+                            df_params_full_pure_trade["close_d-1"] = menos
+                            df_params_full_pure_trade["close_d-1"] = df_params_full_pure_trade["close_d-1"].fillna(
+                                method="ffill")
+                            df_params_full_pure_trade["close_d-1"] = df_params_full_pure_trade["close_d-1"].fillna(
+                                method="bfill")
+
+                            df_params_full_pure_trade = df_params_full_pure_trade.sort_values("date", ascending=False)
+
+                            df_cd = df_params_full_pure_trade.copy()
+
+                            df_cd["ticker"] = 'CDI - FULL'
+
+
+                        else:
+
+                            pass
+
+                        self.notional_pos = todos_pesos[i]
+
+                        df_params_full_pure_trade["flag_buy_long"] = True
+                        df_params_full_pure_trade["flagsell_long"] = False
+
+                        df_params_full_pure_trade["flag_buy_short"] = False
+                        df_params_full_pure_trade["flagsell_short"] = True
+
+                        param = 'teste'
+
+                        anual_long, anual_short, daily_long, daily_short = self.train_test_backtest(
+                            df_params_full_pure_trade[(df_params_full_pure_trade["date"] >= dt_min) & (
+                                        df_params_full_pure_trade["ticker"] == ticker)], df_params_full_pure_trade[
+                                (df_params_full_pure_trade["date"] >= dt_min) & (
+                                            df_params_full_pure_trade["ticker"] == ticker)], 'teste', tipos=['long'])
+                        gs = Gen_Statistics()
+                        res_stats, res_anuais = gs.gen_full_stats(anual_long, anual_short, daily_long, daily_short)
+                        res_stats["param"] = param
+                        res_anuais["param"] = param
+
+                        lista_res.append(res_stats)
+                        lista_res_anuais.append(res_anuais)
+                        lista_daily_long.append(daily_long)
+                        sub_lista.append(daily_long)
+
+
+                    else:
+
+                        pass
+
+                    i = i + 1
+
+                # apos rodr todos os tickes :::::::::::: FAZ UPDATE DO NOTIOANL DO TOTA
+                _temp = pd.concat(sub_lista)
+                _temp = _temp[(_temp["date"] == _temp["date"].max()) & (pd.isnull(_temp["signal"]))]
+                _temp["notional_en"] = _temp["qtty"] * _temp["px_entry"]
+                pl_fundo = _temp["notional"].sum()
+                # pl_fundo = 100000000
+
+            ######################################################### GERANDO COTA DO CDI ###############################################
+            df_params_full_pure_trade = df_params_full_pure_trade2[(df_params_full_pure_trade2["ticker"] == 'CDI')]
+
+            # df_params_full_pure_trade = df_params_full_pure_trade2[df_params_full_pure_trade2["ticker"]=='CDI']
+            df_params_full_pure_trade = df_params_full_pure_trade.sort_values("date")
+
+            df_params_full_pure_trade["carry_t"] = (1 + (df_params_full_pure_trade["close"] / 100)) ** (1 / 252)
+            df_params_full_pure_trade["cumprod"] = df_params_full_pure_trade["carry_t"].cumprod()
+            df_params_full_pure_trade["cumprod"] = df_params_full_pure_trade["cumprod"] / \
+                                                   df_params_full_pure_trade["cumprod"].iloc[0]
+            df_params_full_pure_trade["close"] = df_params_full_pure_trade["cumprod"]
+
+            # df
+
+            df_cd = df_params_full_pure_trade.copy()
+
+            menos = [None] + df_params_full_pure_trade["close"].tolist()[0:-1]
+            df_params_full_pure_trade["close_d-1"] = menos
+            df_params_full_pure_trade["close_d-1"] = df_params_full_pure_trade["close_d-1"].fillna(method="ffill")
+            df_params_full_pure_trade["close_d-1"] = df_params_full_pure_trade["close_d-1"].fillna(method="bfill")
+
+            df_params_full_pure_trade = df_params_full_pure_trade.sort_values("date", ascending=False)
+
+            df_cd = df_params_full_pure_trade.copy()
+
+            df_cd["ticker"] = 'CDI - FULL'
+
+            self.notional_pos = notional_total_inicial
+
+            df_cd["flag_buy_long"] = True
+            df_cd["flagsell_long"] = False
+
+            # factor_deviation_6
+            # high betas
+            df_cd["flag_buy_short"] = False
+            df_cd["flagsell_short"] = True
+
+            # param = 'MACD-J:{}/{} | prazo: {}'.format(media_curta,media_longa,prazo)
+            param = 'teste'
+
+            anual_long, anual_short, daily_long, daily_short = self.train_test_backtest(df_cd, df_cd, 'teste',
+                                                                                        tipos=['long'])
+            gs = Gen_Statistics()
+            res_stats, res_anuais = gs.gen_full_stats(anual_long, anual_short, daily_long, daily_short)
+            res_stats["param"] = param
+            res_anuais["param"] = param
+
+            lista_res.append(res_stats)
+            lista_res_anuais.append(res_anuais)
+            lista_daily_long.append(daily_long)
+
+            ######################################################### GERANDO COTA DO CDI ###############################################
+
+            ######################################################### JUNTANDO TUDO ###############################################
+
+            # 1) FUNDO
+            todos = pd.concat(lista_daily_long)
+            todos = todos[todos["ticker"] != 'CDI - FULL'].groupby("date").agg({"pnl_total": "sum"}).reset_index()
+            todos["pnl_acc"] = todos["pnl_total"].cumsum()
+            todos["pnl_acc2"] = todos["pnl_acc"] + notional_total_inicial
+
+            # 2) CDI
+            cdi = pd.concat(lista_daily_long)
+            cdi = cdi[cdi["ticker"] == 'CDI - FULL'].groupby("date").agg({"pnl_total": "sum"}).reset_index()
+            cdi["pnl_acc"] = cdi["pnl_total"].cumsum()
+            cdi["pnl_acc2"] = cdi["pnl_acc"] + notional_total_inicial
+
+            cota_fundo = todos[["date", "pnl_acc2"]]
+            cota_fundo.columns = ["date", "cota_fundo"]
+
+            cota_cdi = cdi[["date", "pnl_acc2"]]
+            cota_cdi.columns = ["date", "cota_cdi"]
+            comp = pd.merge(cota_fundo, cota_cdi[cota_cdi["date"] >= cota_fundo["date"].min()], left_on=["date"],
+                            right_on=["date"], how="outer")
+            comp["(%) cdi"] = 100 * (comp["cota_fundo"] / comp["cota_cdi"])
+
+            # comp["peso_turing_{}".format(peso_turing)]
+            comp["peso_turing"] = peso_variado
+            lista_comp.append(comp)
+            # ploty_basic(comp,"date",["cota_fundo","cota_cdi"], title = "Cota - Retorno Nominal")
+            # ploty_basic(comp,"date",["(%) cdi"], title ="Cota - (%) CDI")
+
+        for i in range(len(lista_comp)):
+
+            if i == 0:
+
+                temp = lista_comp[i][["date", "cota_fundo"]]
+                temp.columns = ["date",
+                                "cota_fundo_{}%_{}".format(lista_comp[i]["peso_turing"].iloc[0], ativo_variavel)]
+
+            else:
+
+                temp = pd.merge(temp, lista_comp[i][["date", "cota_fundo"]], left_on=["date"], right_on=["date"],
+                                how="inner")
+                temp.rename(columns={
+                    'cota_fundo': "cota_fundo_{}%_{}".format(lista_comp[i]["peso_turing"].iloc[0], ativo_variavel)},
+                            inplace=True)
+
+        if not if_return_df:
+
+            return ploty_basic_API(temp, "date", temp.columns.tolist()[1:], title_graph, x_title=x_title,
+                                   y_title=y_title, title=title)
+
+        else:
+
+            # return temp
+            return pd.merge(temp, cota_cdi, left_on=["date"], right_on=["date"])
+
+
+
+def ploty_basic_API(df, x_data, y_data, mode_plot='line', title=None,
+                    y_title=None, x_title=None, type_plot="lines",
+                    multi_yaxes=False, anotations=None, width=900, height=700,
+                    not_pair=True, color_background='white', showgrid=True):
+    if not isinstance(y_data, list):
+        y_data = [y_data]
+        x_data = [x_data]
+        names = y_data.copy()
+
+    else:
+        if not isinstance(x_data, list):
+            x_data = len(y_data) * [x_data]
+            names = y_data.copy()
+        else:
+            x_data = len(y_data) * x_data
+            names = y_data.copy()
+
+    # todos os tracos iguaos
+    if not isinstance(type_plot, list):
+        if len(y_data) != 1:
+            type_plot = len(y_data) * [type_plot]
+
+        else:
+            type_plot = [type_plot]
+
+
+    else:
+
+        if len(y_data) == 1:
+            type_plot = len(y_data) * type_plot
+
+    '''
+
+     - Caso se deseje destacar os pontos no grafico. Recebe o dataframe de pontos que se deseja 
+    destacar
+
+     - Esta implementado apenas para 1 plot
+
+    '''
+
+    lista_dict = []
+
+    # anotacoes simples
+    if ((anotations is not None) & (not_pair)):
+
+        # dicionario layout
+        d1 = dict(x=4, y=4, xref='x', yref='y', text='Annotation Text 2', showarrow=True, arrowhead=7, ax=0, ay=-40)
+
+        lista_dict = []
+
+        vals_x = anotations[x_data[0]].tolist()
+        vals_y = anotations[y_data[0]].tolist()
+        for el in range(len(vals_y)):
+            dd = d1.copy()
+            dd["x"] = vals_x[el]
+            dd["y"] = vals_y[el]
+            dd["text"] = 'trades_{}'.format(el)
+            lista_dict.append(dd)
+
+    # anotacoes de trades contendo o par de compra e venda de cada trade
+    elif ((anotations is not None) & (not not_pair)):
+
+        lista_dict = []
+
+        vals_x_buy = anotations[x_data[0] + '_buy'].tolist()
+        vals_y_buy = anotations[y_data[0] + '_buy'].tolist()
+        vals_x_sell = anotations[x_data[0] + '_sell'].tolist()
+        vals_y_sell = anotations[y_data[0] + '_sell'].tolist()
+
+        d1 = dict(x=4, y=4, xref='x', yref='y', text='Annotation Text 2', showarrow=True, arrowhead=7, ax=0, ay=-40,
+                  arrowcolor='#636363')
+
+        for el in range(len(vals_y_sell)):
+            dd = d1.copy()
+            dd2 = d1.copy()
+            dd["x"] = vals_x_buy[el]
+            dd["y"] = vals_y_buy[el]
+            dd["text"] = 'trades_buy_{}'.format(el)
+            dd["arrowcolor"] = '#636363'
+            lista_dict.append(dd)
+
+            dd2["x"] = vals_x_sell[el]
+            dd2["y"] = vals_y_sell[el]
+            dd2["text"] = 'trades_sell_{}'.format(el)
+            dd2["arrowcolor"] = '#d9f441'
+            lista_dict.append(dd2)
+
+    data = []
+    ## criamos uma lista de traces
+    count = 1
+    for el in range(len(x_data)):
+        if mode_plot == 'line':
+            trace = go.Scatter(
+                x=df['{}'.format(x_data[el])],
+                y=df['{}'.format(y_data[el])],
+                name=names[el],
+                mode=type_plot[el],
+                yaxis='y{}'.format(count)
+            )
+
+        elif mode_plot == 'bar':
+            trace = go.Bar(
+                x=df['{}'.format(x_data[el])],
+                y=df['{}'.format(y_data[el])],
+                name=names[el],
+                opacity=0.8)
+
+        else:
+            print("tipo invalido de Modo de plot")
+
+        if multi_yaxes:
+            count += 1
+
+        data.append(trace)
+
+    if not multi_yaxes:
+
+        layout = dict(
+            width=width,
+            height=height,
+            title='{}'.format(title),
+            yaxis=dict(title='{}'.format(y_title), showgrid=True, gridcolor='#bdbdbd'),
+            xaxis=dict(title='{}'.format(x_title), showgrid=True, gridcolor='#bdbdbd'),
+            annotations=lista_dict,
+            # showgrid = showgrid,
+            plot_bgcolor=color_background
+        )
+
+    else:
+
+        layout = go.Layout(
+            width=width,
+            height=height,
+            title=title,
+            yaxis=dict(
+                title='yaxis title',
+                showgrid=True, gridcolor='#bdbdbd'
+            ),
+            yaxis2=dict(
+                showgrid=True, gridcolor='#bdbdbd',
+                title='yaxis2 title',
+                titlefont=dict(
+                    color='rgb(148, 103, 189)'
+                ),
+                tickfont=dict(
+                    color='rgb(148, 103, 189)'
+                ),
+                overlaying='y',
+                side='right'
+            ),
+            annotations=lista_dict,
+            plot_bgcolor=color_background
+        )
+
+    # ata = [trace]
+
+    fig = dict(data=data, layout=layout)
+    # py.iplot(fig, filename = "-")
+
+    return fig
+
+
+lv = LowVol(index='IBX', country='brazil', type_trades=["long", "short"], flag_signal=False, local_database=True,
+            dict_param='gss', nbin=7, backtest_di=True)
+
+df_params_pure, df_params_full_pure, tam_rank_in, tam_rank_out = lv.get_data()
+lv.df_params_full_pure = df_params_full_pure.copy()
+
+print("ole ole")
+print(df_params_pure.head())
+
+df = lv.grafico_iteracoes_fundo(lv.df_params_full_pure,
+                                lista_pesos_fundo =[0, 0.05, 0.075, 0.1, 0.15, 0.2, 0.25][0:(0 + 2)],
+                                if_return_df = True, ativo_variavel='Fund', dt_min='2022-01-01', dt_max='2022-09-09',
+                                imab5p_w=0.3, imab5_w=0.2, dipre_w=0.15, cdi_w=0.05, rv_w=0.3,
+                                ibx_w=0.7, small11_w=0.1, divo11_w=0.1, sp500_w=0.1, fund_w=0)
+
+print("transformar em json 222")
+
+print(df)
+
+print("testando jsonnify")
+print(pd.DataFrame({"a": [1, 2, 34]}).to_json(date_format='iso', orient='split'))
+
+df_json = df.to_json(date_format='iso', orient='split')
+
+#print("o df em json eh righ after")
+
+# time.sleep(2)
+
+#print("o df em json eh")
+#print(df_json)
+
+
+#print(" veio tentar ler lendo primeiro 22")
+
+dff = pd.read_json(df_json, orient='split')
+
+#print(" veio tentar ler lendo primeiro 33")
+
+#print(dff)
+
+dff = generae_statistcs_interface(dff.drop("cota_cdi", axis=1), dff[["date", "cota_cdi"]], ret_dd=True)
+
+
+#print(" veio tentar ler lendo primeiro 4444444444444444444444")
+
+#print(dff)

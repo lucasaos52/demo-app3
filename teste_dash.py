@@ -5,7 +5,6 @@ from dash import dcc, html, dash_table
 from dash.dependencies import Output, Input, State
 import dash_bootstrap_components as dbc
 import pandas as pd
-import site
 from datetime import datetime
 import plotly.graph_objs as go
 from math import log, sqrt, degrees, atan
@@ -17,6 +16,8 @@ from itertools import groupby
 from itertools import chain
 import numpy as np
 
+
+print("hello")
 
 # calcula o retorno perceuntual de um ativo (close)
 def calc_return_price(df, lista_return):
@@ -5069,10 +5070,9 @@ def generae_statistcs_interface(temp, cota_cdi, ret_dd=False):
     cols_neg = ['MaxDrawDown', 'Min_DailyPnL', 'MaxRecovery_Nominal(days)', 'MeanRecovery_Nominal(days)',
                 'MaxRecovery_CDI(days)', 'MeanRecovery_CDI(days)', 'volatility']
 
-    _df2["Avg_Improvement"] = _df2.apply(
-        lambda x: np.mean([100 * ((x[cols[el + 1]] - x[cols[0]]) / x[cols[0]]) for el in range(len(cols[1:]))]) if x[
-                                                                                                                       "_"] not in cols_neg else -np.mean(
-            [100 * ((x[cols[el + 1]] - x[cols[0]]) / x[cols[0]]) for el in range(len(cols[1:]))]), axis=1)
+    #_df2["Avg_Improvement"] = _df2.apply(lambda x: np.mean([100 * ((x[cols[el + 1]] - x[cols[0]]) / x[cols[0]]) for el in range(len(cols[1:]))]) if x["_"] not in cols_neg else -np.mean([100 * ((x[cols[el + 1]] - x[cols[0]]) / x[cols[0]]) for el in range(len(cols[1:]))]), axis=1)
+
+    _df2["Avg_Improvement"] = _df2.apply(lambda x: np.mean([100 * ((x[cols[el + 1]] - x[cols[0]]) / x[cols[0]]) for el in range(len(cols[1:]))]) if ((x["_"] not in cols_neg) & (abs(x[cols[0]]) > 0)) else (-np.mean([100 * ((x[cols[el + 1]] - x[cols[0]]) / x[cols[0]]) for el in range(len(cols[1:]))]) if abs(x[cols[0]]) > 0 else np.nan), axis=1)
 
     _df = pd.merge(_df, _df2[["_", "Avg_Improvement"]], left_on=["_"], right_on="_", how="inner")
 
@@ -6677,7 +6677,7 @@ lv.df_params_full_pure = df_params_full_pure.copy()
 app.layout = dbc.Container([
 
     dbc.Row(
-        dbc.Col(html.H1("Portfolio Simulator",
+        dbc.Col(html.H1("Portfolio Simulator3",
                         className='text-center text-primary mb-4'),
                 width=12)
     ),
@@ -6975,6 +6975,7 @@ def clean_data2(s1, s2, s3, s4, s5, s10):
 )
 def clean_data(if_click, n_inter, sim_var, imab5p_w, imab5_w, dipre_w, cdi_w, rv_w, ibx_w, small11_w, divo11_w, sp500_w,
                fund_w, start_date, end_date):
+
     df = lv.grafico_iteracoes_fundo(lv.df_params_full_pure,
                                     lista_pesos_fundo=[0, 0.05, 0.075, 0.1, 0.15, 0.2, 0.25][0:(n_inter + 1)],
                                     if_return_df=True, ativo_variavel=sim_var, dt_min=start_date, dt_max=end_date,
@@ -6986,14 +6987,16 @@ def clean_data(if_click, n_inter, sim_var, imab5p_w, imab5_w, dipre_w, cdi_w, rv
 
     print(df)
 
-    print("testando jsonnify")
+    print("testando jsonnifyyyyyyyyyyy")
     print(pd.DataFrame({"a": [1, 2, 34]}).to_json(date_format='iso', orient='split'))
+
+    print("DONE WITH jsonnifyyyyyyyyyyy")
 
     df_json = df.to_json(date_format='iso', orient='split')
 
     print("o df em json eh righ after")
 
-    time.sleep(2)
+    #time.sleep(2)
 
     print("o df em json eh")
     print(df_json)
@@ -7023,8 +7026,8 @@ def update_graph(jsonified_cleaned_data):
                              x_title='Date', y_title='Pl', title="Fund's PL over time")
     return figln2
 
-
 ################################### GRAFICO 1 ###########################
+
 
 
 ################################### GRAFICO 22222222222222 ###########################
