@@ -1362,7 +1362,12 @@ class bm():
         self.sql_con = self.conect_database("backtesting")
 
     def conect_database(self, schema):
-        mysql_con = create_engine("mysql+pymysql://administrator:Enter123@192.168.0.5/{}".format(schema))
+
+        host = "administrator.cpmflhyn4h6k.us-east-1.rds.amazonaws.com"
+        pwd = "enteraws123&"
+        user = "administrator"
+        mysql_con  = create_engine("mysql+pymysql://{}:{}@{}/{}".format(user, pwd, host, schema))
+
         return mysql_con
 
     def aux_live_update(self):
@@ -5517,7 +5522,7 @@ class LowVol(bm):
         if not 'year' in df_params_full.columns.tolist():
             df_params_full["year"] = df_params_full["date"].apply(lambda x: x.year)
 
-        self.df_indice = self.get_indexCompos(index=self.index)
+        #self.df_indice = self.get_indexCompos(index=self.index)
 
         if self.index != 'IBX':
 
