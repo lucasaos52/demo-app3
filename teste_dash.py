@@ -6986,6 +6986,9 @@ def clean_data(if_click, n_inter, sim_var, imab5p_w, imab5_w, dipre_w, cdi_w, rv
 
     print(df)
 
+    print("testando jsonnify")
+    print(pd.DataFrame({"a": [1, 2, 34]}).to_json(date_format='iso', orient='split'))
+
     df_json = df.to_json(date_format='iso', orient='split')
 
     print("o df em json eh righ after")
@@ -7083,6 +7086,6 @@ def update_graph(jsonified_cleaned_data):
 ################################### TABELAO ###########################
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8000)
+    #app.run_server(debug=True, port=8000)
     #app.run_server(port=8000)
-    #app.run_server(debug=True)
+    app.run_server(debug=True)
