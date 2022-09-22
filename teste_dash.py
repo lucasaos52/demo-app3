@@ -6771,10 +6771,10 @@ app.layout = dbc.Container([
             html.Div(
                 dcc.DatePickerRange(
                     id='date_range_ob',
-                    min_date_allowed=datetime(2022, 1, 1).date(),
+                    min_date_allowed=datetime(2021, 9, 1).date(),
                     max_date_allowed=datetime(2022, 9, 11).date(),
-                    initial_visible_month=datetime(2013, 1, 1).date(),
-                    start_date=datetime(2022, 1, 1).date(),
+                    initial_visible_month=datetime(2021, 9, 1).date(),
+                    start_date=datetime(2021, 9, 1).date(),
                     end_date=datetime(2022, 9, 11).date()
                 ),
                 style={"width": "50%"}),

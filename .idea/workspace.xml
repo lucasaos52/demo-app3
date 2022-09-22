@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="26a2b999-fb96-4760-b39a-2de6156aa3e9" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/Procfile" beforeDir="false" afterPath="$PROJECT_DIR$/Procfile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/teste_dash.py" beforeDir="false" afterPath="$PROJECT_DIR$/teste_dash.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -37,16 +38,16 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="Procfile" value="11" />
+          <entry key="Procfile" value="25" />
           <entry key="gitignore" value="4" />
-          <entry key="py" value="679" />
+          <entry key="py" value="692" />
           <entry key="txt" value="7" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="22" />
-          <entry key="Python" value="679" />
+          <entry key="PLAIN_TEXT" value="36" />
+          <entry key="Python" value="692" />
         </counts>
       </usages-collector>
     </session>
@@ -68,8 +69,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/teste_dash.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="6776" column="44" selection-start-line="6776" selection-start-column="44" selection-end-line="6776" selection-end-column="44" />
+            <state relative-caret-position="320">
+              <caret line="6773" column="51" lean-forward="true" selection-start-line="6773" selection-start-column="51" selection-end-line="6773" selection-end-column="51" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -97,7 +98,7 @@
         <entry file="file://$PROJECT_DIR$/Procfile">
           <provider selected="true" editor-type-id="text-editor">
             <state>
-              <caret column="39" selection-start-column="39" selection-end-column="39" />
+              <caret column="24" selection-start-column="24" selection-end-column="24" />
             </state>
           </provider>
         </entry>
@@ -143,6 +144,8 @@
       <find>server</find>
       <find>app</find>
       <find>fig3</find>
+      <find>192</find>
+      <find>date_range</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -176,18 +179,16 @@
           <expand>
             <path>
               <item name="untitled9" type="b2602c69:ProjectViewProjectNode" />
+              <item name="untitled9" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="untitled9" type="b2602c69:ProjectViewProjectNode" />
               <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
             </path>
             <path>
               <item name="untitled9" type="b2602c69:ProjectViewProjectNode" />
               <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
               <item name="&lt; Python 3.7 &gt;" type="70bed36:NamedLibraryElementNode" />
-            </path>
-            <path>
-              <item name="untitled9" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="&lt; Python 3.7 &gt;" type="70bed36:NamedLibraryElementNode" />
-              <item name="site-packages" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -282,12 +283,12 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14330874" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.14330874" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49947312" visible="true" weight="0.35683298" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49947312" visible="true" weight="0.06507592" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -340,14 +341,14 @@
     <entry file="file://$PROJECT_DIR$/Procfile">
       <provider selected="true" editor-type-id="text-editor">
         <state>
-          <caret column="39" selection-start-column="39" selection-end-column="39" />
+          <caret column="24" selection-start-column="24" selection-end-column="24" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/teste_dash.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="6776" column="44" selection-start-line="6776" selection-start-column="44" selection-end-line="6776" selection-end-column="44" />
+        <state relative-caret-position="320">
+          <caret line="6773" column="51" lean-forward="true" selection-start-line="6773" selection-start-column="51" selection-end-line="6773" selection-end-column="51" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
