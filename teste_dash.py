@@ -6771,10 +6771,10 @@ app.layout = dbc.Container([
             html.Div(
                 dcc.DatePickerRange(
                     id='date_range_ob',
-                    min_date_allowed=datetime(2013, 1, 1).date(),
+                    min_date_allowed=datetime(2022, 1, 1).date(),
                     max_date_allowed=datetime(2022, 9, 11).date(),
                     initial_visible_month=datetime(2013, 1, 1).date(),
-                    start_date=datetime(2013, 1, 1).date(),
+                    start_date=datetime(2022, 1, 1).date(),
                     end_date=datetime(2022, 9, 11).date()
                 ),
                 style={"width": "50%"}),
@@ -6882,12 +6882,14 @@ app.layout = dbc.Container([
 
     ], justify='start'),  # Horizontal:start,center,end,between,around
 
-    dbc.Row([
-        dbc.Col([
-            dcc.Graph(id='line-fig3', figure={})
-        ],  # width={'size':5, 'offset':1},
-            xs=12, sm=12, md=12, lg=5, xl=5, style={"width": "45%"}
-        ),
+    dbc.Row(
+        [
+
+        # dbc.Col([
+        #     dcc.Graph(id='line-fig3', figure={})
+        # ],  # width={'size':5, 'offset':1},
+        #     xs=12, sm=12, md=12, lg=5, xl=5, style={"width": "45%"}
+        # ),
 
         dbc.Col([
 
@@ -7014,13 +7016,13 @@ def update_graph(jsonified_cleaned_data):
 
 
 ################################### GRAFICO 333333333 ###########################
-@app.callback(
-    Output('line-fig3', 'figure'),
-    Input('intermediate-value', 'children'))
-def update_graph(jsonified_cleaned_data):
-    dff = pd.read_json(jsonified_cleaned_data)
-    figln2 = ploty_basic_API(dff.drop("cota_cdi", axis=1), "date", dff.drop("cota_cdi", axis=1).columns.tolist()[1:])
-    return figln2
+# @app.callback(
+#     Output('line-fig3', 'figure'),
+#     Input('intermediate-value', 'children'))
+# def update_graph(jsonified_cleaned_data):
+#     dff = pd.read_json(jsonified_cleaned_data)
+#     figln2 = ploty_basic_API(dff.drop("cota_cdi", axis=1), "date", dff.drop("cota_cdi", axis=1).columns.tolist()[1:])
+#     return figln2
 
 
 ################################### GRAFICO 333333333 #################
@@ -7046,5 +7048,5 @@ def update_graph(jsonified_cleaned_data):
 
 
 if __name__ == '__main__':
-    #app.run_server(debug=True, port=8000)
-    app.run_server(debug=True)
+    app.run_server(debug=True, port=8000)
+    #app.run_server(debug=True)
