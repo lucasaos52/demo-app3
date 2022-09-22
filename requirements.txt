@@ -33,7 +33,6 @@ kiwisolver==1.4.4
 latexmk.py==0.4
 lxml==4.9.1
 MarkupSafe==1.1.1
-matplotlib==3.5.3
 more-itertools==8.14.0
 numpy==1.23.3
 opencl-rt==2021.2.0
@@ -45,7 +44,6 @@ perl==1.0.0
 Pillow==9.2.0
 plotly==5.10.0
 pycparser==2.20
-PyLaTeX==1.4.1
 PyMySQL==1.0.2
 pyOpenSSL==20.0.1
 pyparsing==3.0.9
@@ -53,7 +51,6 @@ python-dateutil==2.8.1
 pytz==2020.5
 requests==2.25.1
 requests-pkcs12==1.10
-scipy==1.9.1
 six==1.15.0
 SQLAlchemy==1.4.41
 tenacity==8.0.1
