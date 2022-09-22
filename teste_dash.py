@@ -6767,7 +6767,8 @@ app.layout = dbc.Container([
 
             html.Label(['Date Range:'], style={'font-weight': 'bold', "text-align": "left", "width": "45%"}),
             html.Button('Run Backtest', id='btn-nclicks-1', n_clicks=0),
-            html.Div(id='intermediate-value', style={'display': 'none'}),
+            #html.Div(id='intermediate-value', style={'display': 'none'}),
+            dcc.Store(id='intermediate-value'),
             html.Div(
                 dcc.DatePickerRange(
                     id='date_range_ob',
@@ -6954,7 +6955,8 @@ def clean_data2(s1, s2, s3, s4, s5, s10):
 
 ################################# UPDATING NONE DIV ##########################
 @app.callback(
-    Output('intermediate-value', 'children'),
+    #Output('intermediate-value', 'children'),
+    Output('intermediate-value', 'data'),
     Input('btn-nclicks-1', 'n_clicks'),
     State('my-dpdn2', 'value'),
     State('sim_var', 'value'),
@@ -6984,7 +6986,14 @@ def clean_data(if_click, n_inter, sim_var, imab5p_w, imab5_w, dipre_w, cdi_w, rv
 
     print(df)
 
-    return df.to_json()
+    df_json = df.to_json()
+
+    time.sleep(2)
+
+    print("o df em json eh")
+    print(df_json)
+
+    return df_json
 
 ################################# UPDATING NONE DIV ##########################
 
@@ -6993,7 +7002,7 @@ def clean_data(if_click, n_inter, sim_var, imab5p_w, imab5_w, dipre_w, cdi_w, rv
 
 @app.callback(
     Output('line-fig', 'figure'),
-    Input('intermediate-value', 'children'))
+    Input('intermediate-value', 'data'))
 
 def update_graph(jsonified_cleaned_data):
 
@@ -7016,7 +7025,7 @@ def update_graph(jsonified_cleaned_data):
 ################################### GRAFICO 22222222222222 ###########################
 @app.callback(
     Output('line-fig2', 'figure'),
-    Input('intermediate-value', 'children'))
+    Input('intermediate-value', 'data'))
 
 def update_graph(jsonified_cleaned_data):
 
@@ -7054,7 +7063,7 @@ def update_graph(jsonified_cleaned_data):
 @app.callback(
     Output('tabelao', 'data'),
     Output('tabelao', 'columns'),
-    Input('intermediate-value', 'children'))
+    Input('intermediate-value', 'data'))
 def update_graph(jsonified_cleaned_data):
     # df row
     dff = pd.read_json(jsonified_cleaned_data)
@@ -7071,7 +7080,7 @@ def update_graph(jsonified_cleaned_data):
 
 ################################### TABELAO ###########################
 
-
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8000)
+    #app.run_server(debug=True, port=8000)
+    app.run_server(port=8000)
     #app.run_server(debug=True)
