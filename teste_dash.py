@@ -6982,11 +6982,13 @@ def clean_data(if_click, n_inter, sim_var, imab5p_w, imab5_w, dipre_w, cdi_w, rv
                                     ibx_w=ibx_w, small11_w=small11_w, divo11_w=divo11_w, sp500_w=sp500_w, fund_w=fund_w)
 
 
-    print("transformar em json")
+    print("transformar em json 222")
 
     print(df)
 
-    df_json = df.to_json()
+    df_json = df.to_json(date_format='iso', orient='split')
+
+    print("o df em json eh righ after")
 
     time.sleep(2)
 
@@ -7008,7 +7010,7 @@ def update_graph(jsonified_cleaned_data):
 
     print(" veio tentar ler lendo primeiro")
 
-    dff = pd.read_json(jsonified_cleaned_data)
+    dff = pd.read_json(jsonified_cleaned_data, orient='split')
 
     print("lendo primeiro")
 
@@ -7031,7 +7033,7 @@ def update_graph(jsonified_cleaned_data):
 
     print(" veio tentar ler lendo primeiro 22")
 
-    dff = pd.read_json(jsonified_cleaned_data)
+    dff = pd.read_json(jsonified_cleaned_data, orient='split')
 
     print(" veio tentar ler lendo primeiro 22")
 
@@ -7066,7 +7068,7 @@ def update_graph(jsonified_cleaned_data):
     Input('intermediate-value', 'data'))
 def update_graph(jsonified_cleaned_data):
     # df row
-    dff = pd.read_json(jsonified_cleaned_data)
+    dff = pd.read_json(jsonified_cleaned_data, orient='split')
 
     print("o df ehehehehe")
     print(dff)
@@ -7081,6 +7083,6 @@ def update_graph(jsonified_cleaned_data):
 ################################### TABELAO ###########################
 
 if __name__ == '__main__':
-    #app.run_server(debug=True, port=8000)
-    app.run_server(port=8000)
+    app.run_server(debug=True, port=8000)
+    #app.run_server(port=8000)
     #app.run_server(debug=True)
