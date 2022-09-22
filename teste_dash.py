@@ -361,41 +361,6 @@ def compute_all(df_desc,
                 col_vol_entropy=None,
                 mode_entropy=1
                 ):
-    from math import log, sqrt, degrees, atan
-    import numpy as np
-    import time
-    from math import log, sqrt, degrees, atan
-    import numpy as np
-    from scipy import stats
-
-    # add autocorr with p value
-    def add_AutoCorr_Sperman(df, col, lag, window=250):
-
-        pr = df[col].tolist()
-        lista_autocorr = []
-        lista_autocorr_p = []
-        for i in range(len(pr)):
-
-            # print("o i : {}".format(i))
-
-            try:
-                res = stats.spearmanr(pr[i:(i + window)], pr[(i + lag):(i + lag + window)])
-                corr = res[0]
-                pval = res[1]
-
-                lista_autocorr.append(corr)
-                lista_autocorr_p.append(pval)
-
-
-            except:
-
-                lista_autocorr.append(None)
-                lista_autocorr_p.append(None)
-
-        df["autocorr_{}_{}_{}".format(col, window, lag)] = lista_autocorr
-        df["PvalAutocorr_{}_{}_{}".format(col, window, lag)] = lista_autocorr_p
-
-        return df
 
     def add_cum_AutoCorr(df, col, lag):
 
