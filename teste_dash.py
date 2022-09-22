@@ -6988,7 +6988,16 @@ def clean_data(if_click, n_inter, sim_var, imab5p_w, imab5_w, dipre_w, cdi_w, rv
     print(df)
 
     print("testando jsonnifyyyyyyyyyyy")
-    print(pd.DataFrame({"a": [1, 2, 34]}).to_json(date_format='iso', orient='split'))
+
+    print("dz temp")
+
+    dz = pd.DataFrame({"a": [1, 2, 34]})
+
+    print(dz)
+
+    print("convertendo pra json o teste")
+
+    print(dz.to_json())
 
     print("DONE WITH jsonnifyyyyyyyyyyy")
 
