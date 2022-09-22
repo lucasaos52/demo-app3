@@ -6979,6 +6979,11 @@ def clean_data(if_click, n_inter, sim_var, imab5p_w, imab5_w, dipre_w, cdi_w, rv
                                     imab5p_w=imab5p_w, imab5_w=imab5_w, dipre_w=dipre_w, cdi_w=cdi_w, rv_w=rv_w,
                                     ibx_w=ibx_w, small11_w=small11_w, divo11_w=divo11_w, sp500_w=sp500_w, fund_w=fund_w)
 
+
+    print("transformar em json")
+
+    print(df)
+
     return df.to_json()
 
 
@@ -6992,6 +6997,11 @@ def clean_data(if_click, n_inter, sim_var, imab5p_w, imab5_w, dipre_w, cdi_w, rv
     Input('intermediate-value', 'children'))
 def update_graph(jsonified_cleaned_data):
     dff = pd.read_json(jsonified_cleaned_data)
+
+    print("lendo primeiro")
+
+    print(dff)
+
     figln2 = ploty_basic_API(dff.drop("cota_cdi", axis=1), "date", dff.drop("cota_cdi", axis=1).columns.tolist()[1:],
                              x_title='Date', y_title='Pl', title="Fund's PL over time")
     return figln2
@@ -7036,6 +7046,9 @@ def update_graph(jsonified_cleaned_data):
 def update_graph(jsonified_cleaned_data):
     # df row
     dff = pd.read_json(jsonified_cleaned_data)
+
+    print("o df ehehehehe")
+    print(dff)
 
     # df processed
     df = generae_statistcs_interface(dff.drop("cota_cdi", axis=1), dff[["date", "cota_cdi"]])
