@@ -6661,61 +6661,24 @@ print(os.path.dirname(sys.executable))
 print(site.getsitepackages()[0])
 
 
-# https://www.bootstrapcdn.com/bootswatch/
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SPACELAB],
-                meta_tags=[{'name': 'viewport',
-                            'content': 'width=device-width, initial-scale=1.0'}]
-                )
+lv = LowVol(index='IBX', country='brazil', type_trades=["long", "short"], flag_signal=False, local_database=True,
+            dict_param='gss', nbin=7, backtest_di=True)
+df_params_pure, df_params_full_pure, tam_rank_in, tam_rank_out = lv.get_data()
+lv.df_params_full_pure = df_params_full_pure.copy()
 
-server = app.server
-
-#PLOTLY_LOGO = "https://images.plot.ly/logo/new-branding/plotly-logomark.png"
 PLOTLY_LOGO = "logo_preto.png"
-#Image.open("logo2.png")
+
+
+# https://www.bootstrapcdn.com/bootswatch/
+# app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SPACELAB],
+#                 meta_tags=[{'name': 'viewport',
+#                             'content': 'width=device-width, initial-scale=1.0'}]
+#                 )
+
 
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
-nav_item = dbc.NavItem(dbc.NavLink("Link", href="#"))
+server = app.server
 
-# make a reuseable dropdown for the different examples
-dropdown = dbc.DropdownMenu(
-    children=[
-        dbc.DropdownMenuItem("Entry 1"),
-        dbc.DropdownMenuItem("Entry 2"),
-        dbc.DropdownMenuItem(divider=True),
-        dbc.DropdownMenuItem("Entry 3"),
-    ],
-    nav=True,
-    in_navbar=True,
-    label="Menu",
-)
-
-# this is the default navbar style created by the NavbarSimple component
-default = dbc.NavbarSimple(
-    children=[nav_item, dropdown],
-    brand="Default",
-    brand_href="#",
-    sticky="top",
-    className="mb-5",
-)
-
-# here's how you can recreate the same thing using Navbar
-# (see also required callback at the end of the file)
-custom_default = dbc.Navbar(
-    dbc.Container(
-        [
-            dbc.NavbarBrand("Custom default", href="#"),
-            dbc.NavbarToggler(id="navbar-toggler1"),
-            dbc.Collapse(
-                dbc.Nav(
-                    [nav_item, dropdown], className="ms-auto", navbar=True
-                ),
-                id="navbar-collapse1",
-                navbar=True,
-            ),
-        ]
-    ),
-    className="mb-5",
-)
 
 # this example that adds a logo to the navbar brand
 logo = dbc.Navbar(
@@ -6735,15 +6698,6 @@ logo = dbc.Navbar(
                 style={"textDecoration": "none"},
             ),
             dbc.NavbarToggler(id="navbar-toggler2", n_clicks=0),
-            dbc.Collapse(
-                dbc.Nav(
-                    [nav_item, dropdown],
-                    className="ms-auto",
-                    navbar=True,
-                ),
-                id="navbar-collapse2",
-                navbar=True,
-            ),
         ],
     ),
     color="dark",
@@ -6751,14 +6705,6 @@ logo = dbc.Navbar(
     className="mb-5",
 )
 
-
-lv = LowVol(index='IBX', country='brazil', type_trades=["long", "short"], flag_signal=False, local_database=True,
-            dict_param='gss', nbin=7, backtest_di=True)
-df_params_pure, df_params_full_pure, tam_rank_in, tam_rank_out = lv.get_data()
-lv.df_params_full_pure = df_params_full_pure.copy()
-
-# Layout section: Bootstrap (https://hackerthemes.com/bootstrap-cheatsheet/)
-# ************************************************************************
 app.layout = dbc.Container([
 
     logo,
@@ -6857,10 +6803,10 @@ app.layout = dbc.Container([
             html.Div(
                 dcc.DatePickerRange(
                     id='date_range_ob',
-                    min_date_allowed=datetime(2013, 1, 1).date(),
+                    min_date_allowed=datetime(2021, 1, 1).date(),
                     max_date_allowed=datetime(2022, 9, 11).date(),
                     initial_visible_month=datetime(2021, 9, 1).date(),
-                    start_date=datetime(2013, 9, 1).date(),
+                    start_date=datetime(2021, 1, 1).date(),
                     end_date=datetime(2022, 9, 11).date()
                 ),
                 style={"width": "50%"}),
@@ -7010,6 +6956,7 @@ app.layout = dbc.Container([
     ], align="center")  # Vertical: start, center, end
 
 ], fluid=True)
+
 
 
 # variable_or_field_to_show
