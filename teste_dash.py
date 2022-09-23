@@ -7006,7 +7006,7 @@ def clean_data(if_click, n_inter, sim_var, imab5p_w, imab5_w, dipre_w, cdi_w, rv
 
     print("os valores da coluna a")
     print(dz["a"].tolist())
-    
+
     print("convertendo pra json o teste")
 
     print(dz.to_json())

@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="26a2b999-fb96-4760-b39a-2de6156aa3e9" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/teste_dash.py" beforeDir="false" afterPath="$PROJECT_DIR$/teste_dash.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vv.py" beforeDir="false" afterPath="$PROJECT_DIR$/vv.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -42,25 +44,25 @@
         <counts>
           <entry key="Procfile" value="25" />
           <entry key="gitignore" value="4" />
-          <entry key="py" value="2015" />
-          <entry key="txt" value="7" />
+          <entry key="py" value="2110" />
+          <entry key="txt" value="22" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="36" />
-          <entry key="Python" value="2015" />
+          <entry key="PLAIN_TEXT" value="51" />
+          <entry key="Python" value="2110" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/teste_dash.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="430">
-              <caret line="7008" column="4" selection-start-line="7008" selection-start-column="4" selection-end-line="7008" selection-end-column="4" />
+            <state relative-caret-position="175">
+              <caret line="6993" column="4" lean-forward="true" selection-start-line="6993" selection-start-column="4" selection-end-line="7011" selection-end-column="23" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -83,8 +85,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/vv.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="102">
-              <caret line="6" column="14" selection-start-line="6" selection-start-column="14" selection-end-line="6" selection-end-column="14" />
+            <state relative-caret-position="337">
+              <caret line="41" lean-forward="true" selection-start-line="41" selection-end-line="41" />
+              <folding>
+                <element signature="e#0#19#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -114,11 +119,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/requirements.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="16">
-              <caret line="23" column="17" lean-forward="true" selection-start-line="23" selection-start-column="17" selection-end-line="23" selection-end-column="17" />
+            <state>
+              <caret column="14" selection-start-column="14" selection-end-column="14" />
             </state>
           </provider>
         </entry>
@@ -127,7 +132,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>transformar em json</find>
       <find>dcc.store</find>
       <find>run_server</find>
       <find>.to_json</find>
@@ -157,6 +161,7 @@
       <find>testando jsonnifyyyyyyyyyyy</find>
       <find>pandas</find>
       <find>.to_j</find>
+      <find>python</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -169,9 +174,9 @@
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/Procfile" />
         <option value="$PROJECT_DIR$/debugg.py" />
-        <option value="$PROJECT_DIR$/requirements.txt" />
-        <option value="$PROJECT_DIR$/vv.py" />
         <option value="$PROJECT_DIR$/teste_dash.py" />
+        <option value="$PROJECT_DIR$/vv.py" />
+        <option value="$PROJECT_DIR$/requirements.txt" />
       </list>
     </option>
   </component>
@@ -231,7 +236,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.teste_dash">
+  <component name="RunManager" selected="Python.vv">
     <configuration name="debugg" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="untitled9" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -324,8 +329,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.teste_dash" />
         <item itemvalue="Python.vv" />
+        <item itemvalue="Python.teste_dash" />
         <item itemvalue="Python.debugg" />
         <item itemvalue="Python.sdgsd" />
       </list>
@@ -362,13 +367,13 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.7471022" visible="true" weight="0.31995663" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.7471022" weight="0.26898047" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.37960956" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.329718" />
-      <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.6459431" weight="0.19197397" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.6459431" visible="true" weight="0.19197397" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.2528978" side_tool="true" weight="0.35140997" />
       <window_info anchor="bottom" id="Python Console" order="10" weight="0.30477223" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -403,13 +408,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/requirements.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="16">
-          <caret line="23" column="17" lean-forward="true" selection-start-line="23" selection-start-column="17" selection-end-line="23" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/debugg.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="195">
@@ -420,20 +418,30 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/vv.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="6" column="14" selection-start-line="6" selection-start-column="14" selection-end-line="6" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/teste_dash.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="430">
-          <caret line="7008" column="4" selection-start-line="7008" selection-start-column="4" selection-end-line="7008" selection-end-column="4" />
+        <state relative-caret-position="175">
+          <caret line="6993" column="4" lean-forward="true" selection-start-line="6993" selection-start-column="4" selection-end-line="7011" selection-end-column="23" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/vv.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="337">
+          <caret line="41" lean-forward="true" selection-start-line="41" selection-end-line="41" />
+          <folding>
+            <element signature="e#0#19#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/requirements.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="14" selection-start-column="14" selection-end-column="14" />
         </state>
       </provider>
     </entry>
