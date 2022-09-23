@@ -43,7 +43,7 @@ pandas==1.2.0
 pandas-datareader==0.10.0
 perl==1.0.0
 Pillow==9.2.0
-plotly==5.10.0
+plotly==5.10.0;python_version <= 3.9.13
 pycparser==2.20
 PyMySQL==1.0.2
 pyOpenSSL==20.0.1
