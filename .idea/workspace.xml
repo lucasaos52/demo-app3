@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="26a2b999-fb96-4760-b39a-2de6156aa3e9" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logo_preto.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/debugg.py" beforeDir="false" afterPath="$PROJECT_DIR$/debugg.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/teste_dash.py" beforeDir="false" afterPath="$PROJECT_DIR$/teste_dash.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -26,6 +29,7 @@
         <counts>
           <entry key="Procfile" value="2" />
           <entry key="gitignore" value="1" />
+          <entry key="jpg" value="1" />
           <entry key="py" value="5" />
           <entry key="pyi" value="1" />
           <entry key="txt" value="10" />
@@ -33,6 +37,7 @@
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
+          <entry key="Image" value="1" />
           <entry key="PLAIN_TEXT" value="13" />
           <entry key="Python" value="5" />
           <entry key="PythonStub" value="1" />
@@ -42,30 +47,35 @@
         <counts>
           <entry key="Procfile" value="25" />
           <entry key="gitignore" value="4" />
-          <entry key="py" value="2110" />
+          <entry key="py" value="2531" />
           <entry key="txt" value="33" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="62" />
-          <entry key="Python" value="2110" />
+          <entry key="Python" value="2531" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/teste_dash.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="192">
-              <caret line="6994" selection-start-line="6994" selection-end-line="6994" />
+            <state relative-caret-position="224">
+              <caret line="6872" column="25" lean-forward="true" selection-start-line="6872" selection-start-column="25" selection-end-line="6872" selection-end-column="25" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
             </state>
           </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/logo.jpg">
+          <provider selected="true" editor-type-id="images" />
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
@@ -80,10 +90,10 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/debugg.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="195">
-              <caret line="5088" column="345" lean-forward="true" selection-start-line="5088" selection-start-column="4" selection-end-line="5088" selection-end-column="345" />
+            <state relative-caret-position="170">
+              <caret line="10" selection-start-line="10" selection-end-line="88" selection-end-column="1" />
               <folding>
-                <element signature="e#0#9#0" expanded="true" />
+                <element signature="e#257#268#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -93,7 +103,7 @@
         <entry file="file://$PROJECT_DIR$/vv.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="337">
-              <caret line="41" lean-forward="true" selection-start-line="41" selection-end-line="41" />
+              <caret line="41" selection-start-line="41" selection-end-line="41" />
               <folding>
                 <element signature="e#0#19#0" expanded="true" />
               </folding>
@@ -126,33 +136,19 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/requirements.txt">
-          <provider selected="true" editor-type-id="text-editor" />
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="88">
+              <caret line="43" column="3" selection-start-line="43" selection-start-column="3" selection-end-line="43" selection-end-column="3" />
+            </state>
+          </provider>
         </entry>
       </file>
     </leaf>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>dcc.store</find>
-      <find>run_server</find>
-      <find>.to_json</find>
-      <find>testando jsonnify</find>
-      <find>from_dlpack</find>
-      <find>num</find>
-      <find>Portfolio Simulator</find>
-      <find>time.sleep(2)</find>
-      <find>time.sleep</find>
-      <find>time</find>
-      <find>lv =</find>
-      <find>intermediate-value</find>
-      <find>sim_var</find>
-      <find>dff = generae_statistcs_interface(dff.drop(&quot;</find>
-      <find>_df2[&quot;Avg_Improvement&quot;] = _df2.apply(</find>
-      <find>_df2[&quot;Avg_Improvement&quot;]</find>
-      <find>KKKKKKKKK</find>
-      <find>PRIMEIRO</find>
       <find>AFTER 1</find>
       <find>avg_im</find>
       <find>read_csv</find>
@@ -165,6 +161,24 @@
       <find>pandas</find>
       <find>.to_j</find>
       <find>python</find>
+      <find>weight se</find>
+      <find>encoded_image</find>
+      <find>logo2</find>
+      <find>dark=True</find>
+      <find>app</find>
+      <find>link</find>
+      <find>logo</find>
+      <find>Portfolio Simulator33</find>
+      <find>Image.open(&quot;logo2.png&quot;),style={'height':'10%', 'width':'10%'}</find>
+      <find>PLOTLY_LOGO</find>
+      <find>src=</find>
+      <find>PLOTLY_LO</find>
+      <find>pilo</find>
+      <find>output_text2</find>
+      <find>Sum of Weights:</find>
+      <find>output_text</find>
+      <find>button</find>
+      <find>dropdown</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -176,11 +190,11 @@
         <option value="$PROJECT_DIR$/sdgsd.py" />
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/Procfile" />
-        <option value="$PROJECT_DIR$/debugg.py" />
-        <option value="$PROJECT_DIR$/teste_dash.py" />
         <option value="$PROJECT_DIR$/vv.py" />
         <option value="$PROJECT_DIR$/runtime.txt" />
         <option value="$PROJECT_DIR$/requirements.txt" />
+        <option value="$PROJECT_DIR$/debugg.py" />
+        <option value="$PROJECT_DIR$/teste_dash.py" />
       </list>
     </option>
   </component>
@@ -202,21 +216,6 @@
             <path>
               <item name="untitled9" type="b2602c69:ProjectViewProjectNode" />
               <item name="untitled9" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="untitled9" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-            </path>
-            <path>
-              <item name="untitled9" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="&lt; Python 3.7 &gt;" type="70bed36:NamedLibraryElementNode" />
-            </path>
-            <path>
-              <item name="untitled9" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="&lt; Python 3.7 &gt;" type="70bed36:NamedLibraryElementNode" />
-              <item name="site-packages" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -334,8 +333,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.teste_dash" />
-        <item itemvalue="Python.vv" />
         <item itemvalue="Python.debugg" />
+        <item itemvalue="Python.vv" />
         <item itemvalue="Python.sdgsd" />
       </list>
     </recent_temporary>
@@ -366,18 +365,18 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17650159" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17650159" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.7471022" visible="true" weight="0.26898047" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.7471022" visible="true" weight="0.2559653" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.37960956" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.329718" />
-      <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.6459431" weight="0.19197397" />
+      <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.6459431" weight="0.20498915" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.2528978" side_tool="true" weight="0.35140997" />
       <window_info anchor="bottom" id="Python Console" order="10" weight="0.30477223" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -412,32 +411,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/debugg.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="5088" column="345" lean-forward="true" selection-start-line="5088" selection-start-column="4" selection-end-line="5088" selection-end-column="345" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/vv.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="337">
-          <caret line="41" lean-forward="true" selection-start-line="41" selection-end-line="41" />
+          <caret line="41" selection-start-line="41" selection-end-line="41" />
           <folding>
             <element signature="e#0#19#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/teste_dash.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="192">
-          <caret line="6994" selection-start-line="6994" selection-end-line="6994" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -449,8 +428,35 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/debugg.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="10" selection-start-line="10" selection-end-line="88" selection-end-column="1" />
+          <folding>
+            <element signature="e#257#268#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/logo.jpg">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/requirements.txt">
-      <provider selected="true" editor-type-id="text-editor" />
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="88">
+          <caret line="43" column="3" selection-start-line="43" selection-start-column="3" selection-end-line="43" selection-end-column="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/teste_dash.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="224">
+          <caret line="6872" column="25" lean-forward="true" selection-start-line="6872" selection-start-column="25" selection-end-line="6872" selection-end-column="25" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
     </entry>
   </component>
   <component name="masterDetails">

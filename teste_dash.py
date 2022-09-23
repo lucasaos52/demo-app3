@@ -15,9 +15,13 @@ from sqlalchemy import create_engine
 from itertools import groupby
 from itertools import chain
 import numpy as np
-
-
+import base64
+from PIL import Image
 print("hello")
+
+
+image_filename = 'logo2.png' # replace with your own image
+encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 
 # calcula o retorno perceuntual de um ativo (close)
 def calc_return_price(df, lista_return):
@@ -6660,12 +6664,95 @@ print(site.getsitepackages()[0])
 
 
 # https://www.bootstrapcdn.com/bootswatch/
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SPACELAB],
                 meta_tags=[{'name': 'viewport',
                             'content': 'width=device-width, initial-scale=1.0'}]
                 )
 
 server = app.server
+
+#PLOTLY_LOGO = "https://images.plot.ly/logo/new-branding/plotly-logomark.png"
+PLOTLY_LOGO = "logo_preto.png"
+#Image.open("logo2.png")
+
+app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+nav_item = dbc.NavItem(dbc.NavLink("Link", href="#"))
+
+# make a reuseable dropdown for the different examples
+dropdown = dbc.DropdownMenu(
+    children=[
+        dbc.DropdownMenuItem("Entry 1"),
+        dbc.DropdownMenuItem("Entry 2"),
+        dbc.DropdownMenuItem(divider=True),
+        dbc.DropdownMenuItem("Entry 3"),
+    ],
+    nav=True,
+    in_navbar=True,
+    label="Menu",
+)
+
+# this is the default navbar style created by the NavbarSimple component
+default = dbc.NavbarSimple(
+    children=[nav_item, dropdown],
+    brand="Default",
+    brand_href="#",
+    sticky="top",
+    className="mb-5",
+)
+
+# here's how you can recreate the same thing using Navbar
+# (see also required callback at the end of the file)
+custom_default = dbc.Navbar(
+    dbc.Container(
+        [
+            dbc.NavbarBrand("Custom default", href="#"),
+            dbc.NavbarToggler(id="navbar-toggler1"),
+            dbc.Collapse(
+                dbc.Nav(
+                    [nav_item, dropdown], className="ms-auto", navbar=True
+                ),
+                id="navbar-collapse1",
+                navbar=True,
+            ),
+        ]
+    ),
+    className="mb-5",
+)
+
+# this example that adds a logo to the navbar brand
+logo = dbc.Navbar(
+    dbc.Container(
+        [
+            html.A(
+                # Use row and col to control vertical alignment of logo / brand
+                dbc.Row(
+                    [
+                        dbc.Col(html.Img(src=Image.open("logo_preto.png"), height="40px")),
+                        dbc.Col(dbc.NavbarBrand("Simulador de Portfolio", className="ms-2")),
+                    ],
+                    align="center",
+                    className="g-0",
+                ),
+                href="https://www.entercapital.com.br/fundos?gclid=Cj0KCQjwsrWZBhC4ARIsAGGUJurewh14oGuAAFmJE7JiGhM52UfrYrCIZ2RAcdlnwn9s_jY1lcsYDO0aAgO7EALw_wcB",
+                style={"textDecoration": "none"},
+            ),
+            dbc.NavbarToggler(id="navbar-toggler2", n_clicks=0),
+            dbc.Collapse(
+                dbc.Nav(
+                    [nav_item, dropdown],
+                    className="ms-auto",
+                    navbar=True,
+                ),
+                id="navbar-collapse2",
+                navbar=True,
+            ),
+        ],
+    ),
+    color="dark",
+    dark=True,
+    className="mb-5",
+)
+
 
 lv = LowVol(index='IBX', country='brazil', type_trades=["long", "short"], flag_signal=False, local_database=True,
             dict_param='gss', nbin=7, backtest_di=True)
@@ -6676,16 +6763,16 @@ lv.df_params_full_pure = df_params_full_pure.copy()
 # ************************************************************************
 app.layout = dbc.Container([
 
-    dbc.Row(
-        dbc.Col(html.H1("Portfolio Simulator3",
-                        className='text-center text-primary mb-4'),
-                width=12)
-    ),
+    logo,
+
+    # dbc.Row(
+    #     dbc.Col(html.H1("Portfolio Simulator33",className='text-center text-primary mb-4'),width=12)
+    # ),
 
     dbc.Row([
 
         dbc.Col([
-
+            #html.Img(src=Image.open("logo2.png"),style={'height':'10%', 'width':'10%'}),
             html.Label(['Weight settings:'], style={'font-weight': 'bold', "text-align": "left", "width": "45%"}),
             html.Div(dcc.Slider(id="s1", min=0, value=0.3, max=1,
                                 marks={0: {'label': 'IMAB5+', 'style': {'color': '#77b0b1'}}},
@@ -6766,16 +6853,16 @@ app.layout = dbc.Container([
         dbc.Col([
 
             html.Label(['Date Range:'], style={'font-weight': 'bold', "text-align": "left", "width": "45%"}),
-            html.Button('Run Backtest', id='btn-nclicks-1', n_clicks=0),
+            dbc.Button('Run Backtest',color='success' ,className='me-1', id='btn-nclicks-1', n_clicks=0),
             #html.Div(id='intermediate-value', style={'display': 'none'}),
             dcc.Store(id='intermediate-value'),
             html.Div(
                 dcc.DatePickerRange(
                     id='date_range_ob',
-                    min_date_allowed=datetime(2021, 9, 1).date(),
+                    min_date_allowed=datetime(2013, 1, 1).date(),
                     max_date_allowed=datetime(2022, 9, 11).date(),
                     initial_visible_month=datetime(2021, 9, 1).date(),
-                    start_date=datetime(2021, 9, 1).date(),
+                    start_date=datetime(2013, 9, 1).date(),
                     end_date=datetime(2022, 9, 11).date()
                 ),
                 style={"width": "50%"}),
@@ -6936,7 +7023,12 @@ app.layout = dbc.Container([
     Input('s9', 'value'),
 )
 def clean_data2(s6, s7, s8, s9):
-    return s6 + s7 + s8 + s9
+    #final = str(s6 + s7 + s8 + s9).split('.')[0] + '.' + str(s6 + s7 + s8 + s9).split('.')[1][0:1]
+
+    soma = s6 + s7 + s8 + s9
+    final = round(soma,1)
+
+    return final
 
 
 # variable_or_field_to_show
@@ -6950,7 +7042,12 @@ def clean_data2(s6, s7, s8, s9):
     Input('s10', 'value'),
 )
 def clean_data2(s1, s2, s3, s4, s5, s10):
-    return s1 + s2 + s3 + s4 + s5 + s10
+
+    soma = s1 + s2 + s3 + s4 + s5 + s10
+
+    final = round(soma,1)
+
+    return final
 
 
 ################################# UPDATING NONE DIV ##########################
