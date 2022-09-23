@@ -20,8 +20,6 @@ from PIL import Image
 print("hello")
 
 
-image_filename = 'logo2.png' # replace with your own image
-encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 
 # calcula o retorno perceuntual de um ativo (close)
 def calc_return_price(df, lista_return):
