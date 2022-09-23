@@ -6993,7 +6993,13 @@ def clean_data(if_click, n_inter, sim_var, imab5p_w, imab5_w, dipre_w, cdi_w, rv
 
     dz = pd.DataFrame({"a": [1, 2, 34]})
 
+    dz.index = ['aa','bb','cc']
+
     print(dz)
+
+    print("os idnices")
+
+    print(dz.index)
 
     print("convertendo pra json o teste")
 
