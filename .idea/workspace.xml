@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="26a2b999-fb96-4760-b39a-2de6156aa3e9" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/runtime.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -28,12 +29,12 @@
           <entry key="gitignore" value="1" />
           <entry key="py" value="5" />
           <entry key="pyi" value="1" />
-          <entry key="txt" value="9" />
+          <entry key="txt" value="10" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="PLAIN_TEXT" value="12" />
+          <entry key="PLAIN_TEXT" value="13" />
           <entry key="Python" value="5" />
           <entry key="PythonStub" value="1" />
         </counts>
@@ -43,12 +44,12 @@
           <entry key="Procfile" value="25" />
           <entry key="gitignore" value="4" />
           <entry key="py" value="2110" />
-          <entry key="txt" value="30" />
+          <entry key="txt" value="33" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="59" />
+          <entry key="PLAIN_TEXT" value="62" />
           <entry key="Python" value="2110" />
         </counts>
       </usages-collector>
@@ -59,11 +60,20 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/teste_dash.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="175">
-              <caret line="6993" column="4" lean-forward="true" selection-start-line="6993" selection-start-column="4" selection-end-line="7011" selection-end-column="23" />
+            <state relative-caret-position="192">
+              <caret line="6994" selection-start-line="6994" selection-end-line="6994" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/runtime.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <caret column="13" selection-start-column="13" selection-end-column="13" />
             </state>
           </provider>
         </entry>
@@ -117,13 +127,9 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/requirements.txt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="322">
-              <caret line="45" column="39" selection-start-line="45" selection-start-column="39" selection-end-line="45" selection-end-column="39" />
-            </state>
-          </provider>
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
     </leaf>
@@ -174,6 +180,7 @@
         <option value="$PROJECT_DIR$/debugg.py" />
         <option value="$PROJECT_DIR$/teste_dash.py" />
         <option value="$PROJECT_DIR$/vv.py" />
+        <option value="$PROJECT_DIR$/runtime.txt" />
         <option value="$PROJECT_DIR$/requirements.txt" />
       </list>
     </option>
@@ -360,18 +367,18 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17650159" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17650159" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.7471022" weight="0.26898047" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.7471022" visible="true" weight="0.26898047" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.37960956" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.329718" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.6459431" visible="true" weight="0.19197397" />
+      <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.6459431" weight="0.19197397" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.2528978" side_tool="true" weight="0.35140997" />
       <window_info anchor="bottom" id="Python Console" order="10" weight="0.30477223" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -416,16 +423,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/teste_dash.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="175">
-          <caret line="6993" column="4" lean-forward="true" selection-start-line="6993" selection-start-column="4" selection-end-line="7011" selection-end-column="23" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/vv.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="337">
@@ -436,10 +433,23 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/requirements.txt">
+    <entry file="file://$PROJECT_DIR$/teste_dash.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="322">
-          <caret line="45" column="39" selection-start-line="45" selection-start-column="39" selection-end-line="45" selection-end-column="39" />
+        <state relative-caret-position="192">
+          <caret line="6994" selection-start-line="6994" selection-end-line="6994" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/requirements.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/runtime.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="13" selection-start-column="13" selection-end-column="13" />
         </state>
       </provider>
     </entry>
