@@ -7025,44 +7025,14 @@ def clean_data(if_click, n_inter, sim_var, imab5p_w, imab5_w, dipre_w, cdi_w, rv
                                     ibx_w=ibx_w, small11_w=small11_w, divo11_w=divo11_w, sp500_w=sp500_w, fund_w=fund_w)
 
 
-    print("transformar em json 222")
 
-    print(df)
-
-    print("testando jsonnifyyyyyyyyyyy")
-
-    print("dz temp")
 
     dz = pd.DataFrame({"a": [1, 2, 34]})
 
     dz.index = ['aa','bb','cc']
 
-    print(dz)
-
-    print("os idnices")
-
-    print(dz.index)
-
-    print("as colunasss")
-    print(dz.columns)
-
-    print("os valores da coluna a")
-    print(dz["a"].tolist())
-
-    print("convertendo pra json o teste")
-
-    print(dz.to_json())
-
-    print("DONE WITH jsonnifyyyyyyyyyyy")
 
     df_json = df.to_json(date_format='iso', orient='split')
-
-    print("o df em json eh righ after")
-
-    #time.sleep(2)
-
-    print("o df em json eh")
-    print(df_json)
 
     return df_json
 
@@ -7077,13 +7047,9 @@ def clean_data(if_click, n_inter, sim_var, imab5p_w, imab5_w, dipre_w, cdi_w, rv
 
 def update_graph(jsonified_cleaned_data):
 
-    print(" veio tentar ler lendo primeiro")
 
     dff = pd.read_json(jsonified_cleaned_data, orient='split')
 
-    print("lendo primeiro")
-
-    print(dff)
 
     figln2 = ploty_basic_API(dff.drop("cota_cdi", axis=1), "date", dff.drop("cota_cdi", axis=1).columns.tolist()[1:],
                              x_title='Date', y_title='Pl', title="Fund's PL over time")
@@ -7100,13 +7066,9 @@ def update_graph(jsonified_cleaned_data):
 
 def update_graph(jsonified_cleaned_data):
 
-    print(" veio tentar ler lendo primeiro 22")
 
     dff = pd.read_json(jsonified_cleaned_data, orient='split')
 
-    print(" veio tentar ler lendo primeiro 22")
-
-    print(dff)
 
     dff = generae_statistcs_interface(dff.drop("cota_cdi", axis=1), dff[["date", "cota_cdi"]], ret_dd=True)
     figln2 = ploty_basic_API(dff, "date", dff.columns.tolist()[1:], x_title='Date', y_title='MaxDD(%)',
@@ -7139,8 +7101,6 @@ def update_graph(jsonified_cleaned_data):
     # df row
     dff = pd.read_json(jsonified_cleaned_data, orient='split')
 
-    print("o df ehehehehe")
-    print(dff)
 
     # df processed
     df = generae_statistcs_interface(dff.drop("cota_cdi", axis=1), dff[["date", "cota_cdi"]])

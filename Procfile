@@ -1,1 +1,1 @@
-web: gunicorn teste_dash:server --timeout 120
+web: gunicorn teste_dash:server --timeout 500
